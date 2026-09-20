@@ -8,11 +8,12 @@ from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from overdone.ingest.embed import embed_query, embed_texts
+from overdone.ingest.embed import embed_texts
 from overdone.ingest.vectorstore import OverdoneVectorStore, note_node
 from overdone.models.embeddings import DataEmbedding
 from overdone.models.exercise import Exercise, ExerciseEnrichment
 from overdone.models.user_log import UserSession
+from overdone.services.vectors import search_embeddings
 
 _QUALITATIVE = re.compile(r"\b(tight|pain|sore|ache|hurt|tweak)\b", re.I)
 
@@ -103,22 +104,15 @@ async def _search(
     source_ids: list[str] | None = None,
     exercise_ids: list[str] | None = None,
 ) -> list[RetrievedChunk]:
-    vector = await embed_query(query)
-    similarity = (1 - DataEmbedding.embedding.cosine_distance(vector)).label("sim")
-    stmt = (
-        select(DataEmbedding, similarity)
-        .where(DataEmbedding.metadata_["kind"].astext == kind)
-        .order_by(DataEmbedding.embedding.cosine_distance(vector))
-        .limit(limit)
+    rows = await search_embeddings(
+        session,
+        query=query,
+        kinds=(kind,),
+        limit=limit,
+        source_ids=source_ids,
+        exercise_ids=exercise_ids,
     )
-    if source_ids:
-        stmt = stmt.where(DataEmbedding.metadata_["source_id"].astext.in_(source_ids))
-    if exercise_ids:
-        stmt = stmt.where(
-            DataEmbedding.metadata_["exercise_id"].astext.in_(exercise_ids)
-        )
-    rows = (await session.execute(stmt)).all()
-    return [_chunk_from_row(chunk, float(score)) for chunk, score in rows]
+    return [_chunk_from_row(chunk, score) for chunk, score in rows]
 
 
 async def _terms_for(session: AsyncSession, exercise_ids: list[str]) -> set[str]:

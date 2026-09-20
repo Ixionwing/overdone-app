@@ -4,9 +4,9 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from overdone.ingest.embed import embed_query
 from overdone.models.embeddings import DataEmbedding
 from overdone.models.exercise import Exercise, ExerciseAlias
+from overdone.services.vectors import search_embeddings
 
 SIMILARITY_THRESHOLD = 0.78
 
@@ -58,17 +58,12 @@ async def _id_from_chunk(
 
 
 async def _nearest_catalog(session: AsyncSession, name: str) -> str | None:
-    query = await embed_query(name)
-    similarity = (1 - DataEmbedding.embedding.cosine_distance(query)).label("sim")
-    kind_col = DataEmbedding.metadata_["kind"].astext
-    rows = (
-        await session.execute(
-            select(DataEmbedding, similarity)
-            .where(kind_col.in_(("exercise", "exercise_name")))
-            .distinct(kind_col)
-            .order_by(kind_col, DataEmbedding.embedding.cosine_distance(query))
-        )
-    ).all()
+    rows = await search_embeddings(
+        session,
+        query=name,
+        kinds=("exercise", "exercise_name"),
+        distinct_on_kind=True,
+    )
     by_kind: dict[str, tuple[DataEmbedding, float]] = {}
     for chunk, score in rows:
         kind = (chunk.metadata_ or {}).get("kind")

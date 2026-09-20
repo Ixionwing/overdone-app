@@ -9,12 +9,12 @@ import asyncio
 import json
 from pathlib import Path
 
-from overdone.ingest.catalog import _chunk_text, _load_rules, enrichment_for
 from overdone.ingest.embed import (
     embed_texts,
     load_embedding_fixture,
     save_embedding_fixture,
 )
+from overdone.ingest.enrichment import chunk_text, enrichment_for, load_rules
 
 ROOT = Path(__file__).resolve()
 MINI = ROOT.parent / "exercises_mini.json"
@@ -60,7 +60,7 @@ QUERIES = [
 
 def main() -> None:
     exercises = json.loads(MINI.read_text())
-    rules = _load_rules()
+    rules = load_rules()
     texts: list[str] = []
     seen: set[str] = set()
 
@@ -71,7 +71,7 @@ def main() -> None:
 
     for item in exercises:
         factors = enrichment_for(item, rules)
-        add(_chunk_text(item, factors))
+        add(chunk_text(item, factors))
         add(str(item["name"]))
         for alias in (rules.get("aliases") or {}).get(item["id"], []):
             add(str(alias))
