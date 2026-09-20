@@ -1,0 +1,73 @@
+[
+  {
+    "id": "Barbell_Bench_Press_-_Medium_Grip",
+    "name": "Barbell Bench Press - Medium Grip",
+    "force": "push",
+    "level": "intermediate",
+    "mechanic": "compound",
+    "equipment": "barbell",
+    "primaryMuscles": ["chest"],
+    "secondaryMuscles": ["shoulders", "triceps"],
+    "instructions": [
+      "Lie on a flat bench with a medium grip.",
+      "Lower the bar to the chest and press to lockout."
+    ],
+    "category": "strength"
+  },
+  {
+    "id": "Incline_Dumbbell_Press",
+    "name": "Incline Dumbbell Press",
+    "force": "push",
+    "level": "intermediate",
+    "mechanic": "compound",
+    "equipment": "dumbbell",
+    "primaryMuscles": ["chest"],
+    "secondaryMuscles": ["shoulders", "triceps"],
+    "instructions": [
+      "Press dumbbells from an incline bench."
+    ],
+    "category": "strength"
+  },
+  {
+    "id": "Cable_Pushdown",
+    "name": "Cable Pushdown",
+    "force": "push",
+    "level": "beginner",
+    "mechanic": "isolation",
+    "equipment": "cable",
+    "primaryMuscles": ["triceps"],
+    "secondaryMuscles": [],
+    "instructions": [
+      "Push a cable attachment down until the elbows are straight."
+    ],
+    "category": "strength"
+  },
+  {
+    "id": "Barbell_Squat",
+    "name": "Barbell Squat",
+    "force": "push",
+    "level": "intermediate",
+    "mechanic": "compound",
+    "equipment": "barbell",
+    "primaryMuscles": ["quadriceps"],
+    "secondaryMuscles": ["glutes", "lower back"],
+    "instructions": [
+      "Squat with a barbell on the upper back."
+    ],
+    "category": "strength"
+  },
+  {
+    "id": "Standing_Military_Press",
+    "name": "Standing Military Press",
+    "force": "push",
+    "level": "intermediate",
+    "mechanic": "compound",
+    "equipment": "barbell",
+    "primaryMuscles": ["shoulders"],
+    "secondaryMuscles": ["triceps"],
+    "instructions": [
+      "Press a barbell overhead from the shoulders."
+    ],
+    "category": "strength"
+  }
+]

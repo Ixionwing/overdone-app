@@ -1,0 +1,25 @@
+{
+  "preferred_unit": "lb",
+  "benchmarks": [
+    {
+      "exercise": "Barbell Bench Press - Medium Grip",
+      "one_rm": 225,
+      "unit": "lb"
+    }
+  ],
+  "sessions": [
+    {
+      "date": "2026-09-13",
+      "notes": "Right shoulder felt tight on set 3",
+      "sets": [
+        {
+          "exercise": "Barbell Bench Press - Medium Grip",
+          "weight": 185,
+          "unit": "lb",
+          "reps": 5,
+          "sets": 4
+        }
+      ]
+    }
+  ]
+}

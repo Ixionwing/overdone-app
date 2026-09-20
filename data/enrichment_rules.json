@@ -1,0 +1,27 @@
+{
+  "aliases": {
+    "Barbell_Bench_Press_-_Medium_Grip": [
+      "DB Bench",
+      "DB Bench Press",
+      "Bench",
+      "Bench Press"
+    ],
+    "Incline_Dumbbell_Press": ["Incline DB Press", "Incline Dumbbell Press"],
+    "Cable_Pushdown": ["Pushdowns", "Pushdown"],
+    "Barbell_Squat": ["Squat"],
+    "Standing_Military_Press": ["OHP", "Overhead Press"]
+  },
+  "by_source_id": {
+    "Barbell_Squat": { "axial_factor": 0.9 }
+  },
+  "defaults": {
+    "axial_factor": 0.15,
+    "cns_factor": 0.25,
+    "joints": {
+      "shoulder": 0.0,
+      "knee": 0.0,
+      "spine": 0.0,
+      "elbow": 0.0
+    }
+  }
+}
