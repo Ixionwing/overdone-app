@@ -7,9 +7,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 def _discover_data_dir() -> Path:
     for parent in Path(__file__).resolve().parents:
         candidate = parent / "data"
-        if (candidate / "enrichment_rules.json").exists() or (
-            candidate / "exercises.json"
-        ).exists():
+        if (
+            (candidate / "enrichment_rules.json").exists()
+            or (candidate / "exercises.json").exists()
+            or (candidate / "free-exercise-db" / "exercises.json").exists()
+        ):
             return candidate
     return Path.cwd() / "data"
 
@@ -50,8 +52,8 @@ class Settings(BaseSettings):
             return Path(self.catalog_path)
         data = self.resolved_data_dir()
         for candidate in (
-            data / "exercises.json",
             data / "free-exercise-db" / "exercises.json",
+            data / "exercises.json",
         ):
             if candidate.exists():
                 return candidate

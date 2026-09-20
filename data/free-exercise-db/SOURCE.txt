@@ -1,0 +1,4 @@
+Source: https://github.com/yuhonas/free-exercise-db
+File: dist/exercises.json (combined dump)
+License: Unlicense (public domain)
+Fetched: 2026-09-20

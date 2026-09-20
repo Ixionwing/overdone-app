@@ -13,7 +13,7 @@ docker compose up --build
 - API: http://localhost:8000/health
 - MCP: http://localhost:8000/mcp
 
-API startup migrates Postgres and seeds `data/exercises.json` (mini free-exercise-db extract) when the catalog is empty. MiniLM weights live in the `hf_cache` volume.
+API startup migrates Postgres and seeds `data/free-exercise-db/exercises.json` (yuhonas/free-exercise-db, Unlicense) when the catalog is empty. MiniLM weights live in the `hf_cache` volume. Tests still use the mini fixture.
 
 Optional extract model:
 
