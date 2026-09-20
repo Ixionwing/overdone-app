@@ -43,7 +43,7 @@ Cursor / agents  --MCP (mounted)--> same FastAPI process
                                       +--> deterministic scoring
                                       +--> SQLAlchemy (logs, 1RMs, enrichment)
                                       +--> LlamaIndex ingest (exercise catalog -> pgvector)
-                                      +--> Pydantic AI RAG retrieve (catalog + notes)
+                                      +--> SQL/pgvector retrieve_context (catalog + notes)
                                       |
 PostgreSQL 16 + pgvector <------------+
 ```
@@ -208,6 +208,7 @@ class ItemVerdict(BaseModel):
     light: TrafficLight
     factors: FactorScores
     narrative: str
+    catalog_source_id: str | None = None
 
 
 class WarningFlag(BaseModel):
@@ -259,7 +260,7 @@ class EvaluationResult(BaseModel):
 }
 ```
 
-Unknown keys are rejected (Pydantic extra=forbid). Missing `unit` on a row inherits `preferred_unit`. Import **replaces** the current baseline (scratchpad, one active history).
+Unknown keys are rejected (Pydantic extra=forbid). Missing `unit` on a row inherits `preferred_unit`. Import **replaces** the current baseline (scratchpad, one active history). On replace, each set/benchmark name is resolved against the catalog; bound rows store `exercises.id` and GET echoes it as optional `exercise_id`. Client-supplied `exercise_id` is ignored and re-resolved from `exercise`. Unmatched names stay `null`.
 
 ### 5.3 SQLAlchemy tables
 
@@ -270,7 +271,7 @@ Naming convention on `MetaData`. `lazy="raise"` on relationships. Alembic owns `
 | `exercises` | Catalog row from free-exercise-db (`source_id`, `name`, muscles, equipment, …) |
 | `exercise_enrichment` | POC axial / CNS / joint factors keyed by `exercises.id` |
 | `exercise_aliases` | Extra names for matching (`DB Bench` → catalog id) |
-| `data_embeddings` | LlamaIndex `PGVectorStore` table (384-d `vector`) |
+| `data_embeddings` | Alembic table written by LlamaIndex (`OverdoneVectorStore`, 384-d `vector`) |
 | `user_benchmarks` | Active 1RMs |
 | `user_sessions` | Logged sessions (`logged_on`, `notes`) |
 | `user_sets` | Sets belonging to a session |
@@ -400,12 +401,12 @@ Scope disclaimer warning when `asks_substitution`:
 
 ## 10. RAG (query time)
 
-LlamaIndex **writes** the index. Pydantic AI RAG **reads** it. MCP tools must not re-implement ingest.
+LlamaIndex **writes** the index. `retrieve_context` **reads** the same `data_embeddings` rows over SQL/pgvector. Pydantic AI is the optional extractor when `OLLAMA_BASE_URL` is set, not the retrieve agent. MCP tools must not re-implement ingest.
 
 Retrieve (k=4) for:
 
-1. Bound exercises (biomechanics chunk) → citations on gauges/help text (`source_id`).
-2. Session notes semantically related to the prompt or matched joints/muscles, filtered to notes that look qualitative (non-empty). **Do not** change scores.
+1. Bound exercises (biomechanics chunk) → `ItemVerdict.catalog_source_id` on gauges/help text.
+2. Session notes that are qualitative **and** (keyword overlap with bound joints/muscles **or** semantic similarity ≥ 0.35). **Do not** change scores.
 
 Note banner format: `Note from {relative day}: '{quote}'`.
 
@@ -498,5 +499,5 @@ Do not use SQLite as a stand-in for Postgres/pgvector.
 | No substitutions | 8, 9.5 |
 | Extreme prompts, standard math | 9 |
 | Stateless prompts | 3, 5.3 |
-| FastMCP, Pydantic AI, pgvector, MiniLM, free-exercise-db | 3, 6, 8, 10, 12 |
+| FastMCP, optional Pydantic AI extract, pgvector, MiniLM, free-exercise-db | 3, 6, 8, 10, 12 |
 | DoD container / seed / tools / UI | 14, 6, 12, 13 |

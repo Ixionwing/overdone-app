@@ -87,6 +87,9 @@ export function VerdictPanel({ result }: VerdictPanelProps) {
           <li key={item.exercise_id}>
             <span className={lightClass(item.light)}>{item.light}</span>{" "}
             {item.exercise_name}
+            {item.catalog_source_id ? (
+              <span className="citation"> {item.catalog_source_id}</span>
+            ) : null}
           </li>
         ))}
       </ul>

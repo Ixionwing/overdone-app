@@ -15,6 +15,13 @@ function apiBaseUrl(): string {
   );
 }
 
+function resourceUrl(path: string): string {
+  if (typeof window === "undefined") {
+    return `${apiBaseUrl()}${path}`;
+  }
+  return path;
+}
+
 export async function getHealth(): Promise<HealthStatus> {
   const response = await fetch(`${apiBaseUrl()}/health`, { cache: "no-store" });
   if (!response.ok) {
@@ -24,7 +31,9 @@ export async function getHealth(): Promise<HealthStatus> {
 }
 
 export async function getBaseline(): Promise<BaselineStatus> {
-  const response = await fetch("/api/v1/baseline", { cache: "no-store" });
+  const response = await fetch(resourceUrl("/api/v1/baseline"), {
+    cache: "no-store",
+  });
   if (!response.ok) {
     throw new Error(`Failed to load baseline (${response.status})`);
   }

@@ -2,8 +2,14 @@ from __future__ import annotations
 
 import asyncio
 
-from overdone.schemas.dto import PromptKind, Unit
+import pytest
+from pydantic import ValidationError
+from pydantic_ai import UnexpectedModelBehavior
+
+from overdone.config import Settings
+from overdone.schemas.dto import ExtractedPrompt, PromptKind, ProposedItem, Unit
 from overdone.services.extract import extract_prompt
+from overdone.services.extract_llm import extract_client_from_settings
 
 
 def _extract(text: str):
@@ -62,3 +68,102 @@ def test_missing_unit_stays_none():
     result = _extract("Add 200 to Bench tomorrow.")
     assert result.unit is None
     assert result.items[0].delta_kg == 200
+
+
+class _BrokenExtractor:
+    async def extract(self, text: str):
+        raise RuntimeError("extractor bug")
+
+
+def test_unexpected_extractor_error_propagates():
+    with pytest.raises(RuntimeError, match="extractor bug"):
+        asyncio.run(
+            extract_prompt(
+                "Add 20 lbs to Bench tomorrow.",
+                llm_client=_BrokenExtractor(),
+            )
+        )
+
+
+class _TimeoutExtractor:
+    async def extract(self, text: str):
+        raise TimeoutError
+
+
+def test_timeout_falls_back_to_heuristic():
+    result = asyncio.run(
+        extract_prompt(
+            "Add 20 lbs to Bench tomorrow.",
+            llm_client=_TimeoutExtractor(),
+        )
+    )
+    assert len(result.items) == 1
+    assert result.items[0].delta_kg is not None
+    assert abs(result.items[0].delta_kg - 9.0718474) < 1e-6
+
+
+class _InvalidExtractor:
+    async def extract(self, text: str):
+        raise ValidationError.from_exception_data("ExtractedPrompt", [])
+
+
+def test_invalid_structured_output_falls_back_to_heuristic():
+    result = asyncio.run(
+        extract_prompt(
+            "Add 20 lbs to Bench tomorrow.",
+            llm_client=_InvalidExtractor(),
+        )
+    )
+    assert len(result.items) == 1
+    assert "bench" in result.items[0].exercise_name.casefold()
+
+
+class _ModelErrorExtractor:
+    async def extract(self, text: str):
+        raise UnexpectedModelBehavior("not json")
+
+
+def test_model_behavior_error_falls_back_to_heuristic():
+    result = asyncio.run(
+        extract_prompt(
+            "Add 20 lbs to Bench tomorrow.",
+            llm_client=_ModelErrorExtractor(),
+        )
+    )
+    assert len(result.items) == 1
+
+
+class _FixedExtractor:
+    async def extract(self, text: str) -> ExtractedPrompt:
+        return ExtractedPrompt(
+            kind=PromptKind.single_session,
+            items=[
+                ProposedItem(
+                    exercise_name="custom nick",
+                    delta_kg=9.07,
+                    exercise_id="invented",
+                )
+            ],
+            unit=Unit.lb,
+            raw_text=text,
+        )
+
+
+def test_llm_extract_is_used_and_catalog_ids_are_stripped():
+    result = asyncio.run(extract_prompt("bump the press", llm_client=_FixedExtractor()))
+    assert result.items[0].exercise_name == "custom nick"
+    assert result.items[0].delta_kg == 9.07
+    assert result.items[0].exercise_id is None
+
+
+def test_unset_ollama_url_builds_no_client():
+    assert extract_client_from_settings(Settings(ollama_base_url=None)) is None
+    assert extract_client_from_settings(Settings(ollama_base_url="  ")) is None
+
+
+def test_ollama_url_builds_extract_client():
+    client = extract_client_from_settings(
+        Settings(ollama_base_url="http://127.0.0.1:9/v1")
+    )
+    assert client is not None
+    assert callable(client.extract)

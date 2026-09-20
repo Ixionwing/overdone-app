@@ -88,6 +88,7 @@ class ItemVerdict(BaseModel):
     light: TrafficLight
     factors: FactorScores
     narrative: str
+    catalog_source_id: str | None = None
 
 
 class WarningFlag(BaseModel):

@@ -21,6 +21,7 @@ class RetrievedChunk(BaseModel):
     kind: str
     text: str
     source_id: str | None = None
+    exercise_id: str | None = None
     session_id: str | None = None
     logged_on: date | None = None
     score: float = 0.0
@@ -86,6 +87,7 @@ def _chunk_from_row(row: DataEmbedding, score: float) -> RetrievedChunk:
         kind=str(meta.get("kind") or ""),
         text=row.text,
         source_id=meta.get("source_id") or meta.get("ref_doc_id"),
+        exercise_id=meta.get("exercise_id"),
         session_id=meta.get("session_id"),
         logged_on=logged_on,
         score=score,
@@ -158,23 +160,6 @@ async def _keyword_notes(
     return hits
 
 
-async def _qualitative_notes(session: AsyncSession) -> list[RetrievedChunk]:
-    rows = list(
-        (
-            await session.scalars(
-                select(DataEmbedding).where(
-                    DataEmbedding.metadata_["kind"].astext == "session_note"
-                )
-            )
-        ).all()
-    )
-    return [
-        _chunk_from_row(row, 1.0)
-        for row in rows
-        if row.text.strip() and _QUALITATIVE.search(row.text)
-    ]
-
-
 async def retrieve_context(
     session: AsyncSession,
     *,
@@ -199,10 +184,11 @@ async def retrieve_context(
         if note.text.strip() and note.score >= 0.35
     ]
     keyword_notes = await _keyword_notes(session, await _terms_for(session, bound))
-    qualitative = await _qualitative_notes(session)
     notes: list[RetrievedChunk] = []
     seen: set[str] = set()
-    for note in [*keyword_notes, *qualitative, *semantic_notes]:
+    for note in [*keyword_notes, *semantic_notes]:
+        if not note.text.strip() or not _QUALITATIVE.search(note.text):
+            continue
         key = note.source_id or note.text
         if key in seen:
             continue

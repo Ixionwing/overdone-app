@@ -103,6 +103,9 @@ def test_plus_20lb_bench_returns_yellow_gauges(client: TestClient) -> None:
     note = next(flag for flag in body["warnings"] if flag["kind"] == "qualitative_note")
     assert "Note from" in note["message"]
     assert "Right shoulder felt tight on set 3" in note["message"]
+    assert body["items"][0]["catalog_source_id"] == (
+        "Barbell_Bench_Press_-_Medium_Grip"
+    )
 
 
 def test_multi_movement_itemizes_three(client: TestClient) -> None:
@@ -268,3 +271,41 @@ def test_embedding_nickname_scores_like_bench(
     assert body["halted"] is None
     assert body["overall_light"] == "yellow"
     assert body["items"][0]["factors"]["volume_jump_pct"] == 10.8
+    assert body["items"][0]["catalog_source_id"] == (
+        "Barbell_Bench_Press_-_Medium_Grip"
+    )
+
+
+def test_evaluate_uses_injected_extract_client(client: TestClient) -> None:
+    from fastapi import FastAPI
+
+    from overdone.schemas.dto import ExtractedPrompt, PromptKind, ProposedItem, Unit
+
+    class FakeExtractor:
+        async def extract(self, text: str) -> ExtractedPrompt:
+            return ExtractedPrompt(
+                kind=PromptKind.single_session,
+                items=[
+                    ProposedItem(
+                        exercise_name="pushdown",
+                        extra_sets=3,
+                        exercise_id="invented",
+                    )
+                ],
+                unit=Unit.lb,
+                raw_text=text,
+            )
+
+    app = client.app
+    assert isinstance(app, FastAPI)
+    app.state.extract_client = FakeExtractor()
+    _put(client)
+    response = client.post(
+        "/api/v1/evaluate",
+        json={"prompt": "I want to add 20 lbs to my bench press tomorrow"},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["halted"] is None
+    assert "pushdown" in body["items"][0]["exercise_name"].casefold()
+    assert body["items"][0]["factors"]["volume_jump_pct"] != 10.8

@@ -130,6 +130,12 @@ strong {
   margin: 0.35rem 0;
 }
 
+.citation {
+  display: block;
+  font-size: 0.8rem;
+  color: #5c564c;
+}
+
 .gauges {
   margin-top: 0.75rem;
 }

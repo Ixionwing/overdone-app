@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import os
 import shutil
 import socket
@@ -14,10 +15,30 @@ from fastapi.testclient import TestClient
 from sqlalchemy import text
 
 from overdone.config import Settings
-from overdone.db import create_engine
+from overdone.db import create_engine, create_session_factory
+from overdone.ingest.catalog import seed_catalog
+from overdone.ingest.embed import (
+    load_embedding_fixture,
+    recording_embeddings,
+    save_embedding_fixture,
+    use_real_embeddings,
+)
 from overdone.main import create_app
 
 PG_ROOT = Path.home() / ".cache" / "overdone-pgsql" / "pgsql"
+EMBED_FIXTURE = Path(__file__).resolve().parent / "fixtures" / "mini_embeddings.json"
+MINI_CATALOG = Path(__file__).resolve().parent / "fixtures" / "exercises_mini.json"
+
+
+@pytest.fixture(scope="session", autouse=True)
+def embedding_fixture() -> Iterator[None]:
+    if use_real_embeddings() and not recording_embeddings():
+        yield
+        return
+    load_embedding_fixture(EMBED_FIXTURE, record=recording_embeddings())
+    yield
+    if recording_embeddings():
+        save_embedding_fixture()
 
 
 def _free_port() -> int:
@@ -143,6 +164,16 @@ def client(postgres_url: str) -> Iterator[TestClient]:
         await engine.dispose()
 
     asyncio.run(wipe())
-    settings = Settings(database_url=postgres_url)
+
+    async def seed() -> None:
+        engine = create_engine(postgres_url)
+        factory = create_session_factory(engine)
+        async with factory() as session:
+            await seed_catalog(session, json.loads(MINI_CATALOG.read_text()))
+            await session.commit()
+        await engine.dispose()
+
+    asyncio.run(seed())
+    settings = Settings(database_url=postgres_url, ollama_base_url=None)
     with TestClient(create_app(settings)) as test_client:
         yield test_client

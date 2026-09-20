@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from overdone.models.exercise import Exercise
 from overdone.models.exercise import ExerciseEnrichment as EnrichmentRow
 from overdone.models.user_log import UserBenchmark, UserSession, UserSettings
 from overdone.schemas.dto import (
@@ -15,6 +16,7 @@ from overdone.schemas.dto import (
     ExtractedPrompt,
     Halt,
     HaltReason,
+    ItemVerdict,
     LogSet,
     PromptKind,
     ProposedItem,
@@ -209,9 +211,18 @@ async def _bind_name(
     return history, catalog_id
 
 
-async def _note_flags(
+async def _catalog_source_id(
+    session: AsyncSession, catalog_id: str | None
+) -> str | None:
+    if not catalog_id or not catalog_id.isdigit():
+        return None
+    row = await session.get(Exercise, int(catalog_id))
+    return row.source_id if row else None
+
+
+async def _retrieve_support(
     session: AsyncSession, prompt: str, exercise_ids: list[str]
-) -> list[WarningFlag]:
+) -> tuple[list[WarningFlag], dict[str, str]]:
     retrieved = await retrieve_context(
         session, exercise_ids=exercise_ids, prompt=prompt
     )
@@ -226,11 +237,30 @@ async def _note_flags(
                 source_id=note.source_id,
             )
         )
-    return flags
+    citations = {
+        chunk.exercise_id: chunk.source_id
+        for chunk in retrieved.exercises
+        if chunk.exercise_id and chunk.source_id
+    }
+    return flags, citations
 
 
-async def evaluate_prompt(session: AsyncSession, prompt: str) -> EvaluationResult:
-    extracted = await extract_prompt(prompt, llm_client=None)
+async def _with_citation(
+    session: AsyncSession,
+    verdict: ItemVerdict,
+    citations: dict[str, str],
+    catalog_id: str | None,
+) -> ItemVerdict:
+    source = citations.get(verdict.exercise_id)
+    if source is None:
+        source = await _catalog_source_id(session, catalog_id)
+    return verdict.model_copy(update={"catalog_source_id": source})
+
+
+async def evaluate_prompt(
+    session: AsyncSession, prompt: str, *, llm_client: object | None = None
+) -> EvaluationResult:
+    extracted = await extract_prompt(prompt, llm_client=llm_client)
     sessions, benchmarks, preferred = await _history(session)
     if not sessions and not benchmarks:
         return _halt(HaltReason.missing_baseline, _MISSING_BASELINE)
@@ -284,7 +314,11 @@ async def evaluate_prompt(session: AsyncSession, prompt: str) -> EvaluationResul
                 "narrative": macro_narrative(verdict, weeks),
             }
         )
-        flags.extend(await _note_flags(session, prompt, [catalog_id or history]))
+        extra, citations = await _retrieve_support(
+            session, prompt, [catalog_id or history]
+        )
+        flags.extend(extra)
+        verdict = await _with_citation(session, verdict, citations, catalog_id)
         return EvaluationResult(
             overall_light=verdict.light,
             items=[verdict],
@@ -329,11 +363,17 @@ async def evaluate_prompt(session: AsyncSession, prompt: str) -> EvaluationResul
         catalog_ids.append(key)
 
     overall, verdicts, factors = score_session(resolved_items, last_by, enrichment)
-    flags.extend(await _note_flags(session, prompt, catalog_ids))
+    extra, citations = await _retrieve_support(session, prompt, catalog_ids)
+    flags.extend(extra)
+    cited: list[ItemVerdict] = []
+    for verdict, item in zip(verdicts, resolved_items, strict=True):
+        cited.append(
+            await _with_citation(session, verdict, citations, item.exercise_id)
+        )
     return EvaluationResult(
         overall_light=overall,
-        items=verdicts,
+        items=cited,
         session_factors=factors,
-        narrative=session_narrative(overall, verdicts, factors),
+        narrative=session_narrative(overall, cited, factors),
         warnings=flags,
     )

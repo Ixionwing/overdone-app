@@ -16,6 +16,7 @@ from overdone.schemas.api import (
     ImportSession,
     ImportSet,
 )
+from overdone.services.resolve import resolve_exercise_name
 from overdone.services.retrieve import rebuild_session_notes
 from overdone.services.units import from_kg, to_kg
 
@@ -36,6 +37,16 @@ def _row_unit(explicit: str | None, preferred: str) -> str:
     return unit
 
 
+async def _catalog_pk(
+    session: AsyncSession, name: str, cache: dict[str, int | None]
+) -> int | None:
+    key = name.casefold().strip()
+    if key not in cache:
+        bound = await resolve_exercise_name(session, name)
+        cache[key] = int(bound) if bound and bound.isdigit() else None
+    return cache[key]
+
+
 async def replace_baseline(
     session: AsyncSession, payload: BaselineImport
 ) -> BaselineStatus:
@@ -44,11 +55,13 @@ async def replace_baseline(
     await session.execute(delete(UserBenchmark))
     await session.execute(delete(UserSettings))
 
+    catalog_ids: dict[str, int | None] = {}
     session.add(UserSettings(id=1, preferred_unit=payload.preferred_unit))
     for benchmark in payload.benchmarks:
         unit = _row_unit(benchmark.unit, payload.preferred_unit)
         session.add(
             UserBenchmark(
+                exercise_id=await _catalog_pk(session, benchmark.exercise, catalog_ids),
                 exercise_name=benchmark.exercise,
                 one_rm_kg=to_kg(benchmark.one_rm, unit),
                 unit=unit,
@@ -63,6 +76,7 @@ async def replace_baseline(
             session.add(
                 UserSet(
                     session_id=row.id,
+                    exercise_id=await _catalog_pk(session, item.exercise, catalog_ids),
                     exercise_name=item.exercise,
                     weight_kg=to_kg(item.weight, unit),
                     unit=unit,
@@ -72,7 +86,9 @@ async def replace_baseline(
             )
     await session.flush()
     await rebuild_session_notes(session)
-    return await get_baseline(session)
+    status = await get_baseline(session)
+    await session.commit()
+    return status
 
 
 def parse_baseline_text(text: str) -> BaselineImport:
@@ -159,6 +175,7 @@ async def get_baseline(session: AsyncSession) -> BaselineStatus:
             exercise=row.exercise_name,
             one_rm=_round_weight(from_kg(row.one_rm_kg, row.unit)),
             unit=row.unit,
+            exercise_id=str(row.exercise_id) if row.exercise_id is not None else None,
         )
         for row in benchmarks_result
     ]
@@ -173,6 +190,9 @@ async def get_baseline(session: AsyncSession) -> BaselineStatus:
                     reps=item.reps,
                     sets=item.sets,
                     unit=item.unit,
+                    exercise_id=(
+                        str(item.exercise_id) if item.exercise_id is not None else None
+                    ),
                 )
                 for item in sorted(row.sets, key=lambda item: item.id)
             ],

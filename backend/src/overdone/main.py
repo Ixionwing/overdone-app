@@ -8,6 +8,7 @@ from overdone.api.routers import baseline, evaluate, health
 from overdone.config import Settings
 from overdone.config import settings as default_settings
 from overdone.db import create_engine, create_session_factory
+from overdone.services.extract_llm import extract_client_from_settings
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -24,6 +25,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.settings = config
     app.state.engine = engine
     app.state.session_factory = session_factory
+    app.state.extract_client = extract_client_from_settings(config)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],

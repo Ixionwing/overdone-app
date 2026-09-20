@@ -1,37 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import { getBaseline, putBaseline, putBaselineText } from "@/lib/api";
+import { putBaseline, putBaselineText } from "@/lib/api";
+import { parseBaselineImport } from "@/lib/baseline";
 import type { BaselineStatus } from "@/lib/types";
 
-export function BaselinePanel() {
-  const [draft, setDraft] = useState("");
-  const [status, setStatus] = useState<BaselineStatus | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+type BaselinePanelProps = {
+  initialStatus: BaselineStatus | null;
+  initialError: string | null;
+};
 
-  useEffect(() => {
-    let cancelled = false;
-    void getBaseline()
-      .then((loaded) => {
-        if (cancelled) {
-          return;
-        }
-        setStatus(loaded);
-        setDraft(JSON.stringify(loaded.baseline, null, 2));
-      })
-      .catch((err: unknown) => {
-        if (!cancelled) {
-          setError(
-            err instanceof Error ? err.message : "Failed to load baseline",
-          );
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+export function BaselinePanel({
+  initialStatus,
+  initialError,
+}: BaselinePanelProps) {
+  const [status, setStatus] = useState(initialStatus);
+  const [error, setError] = useState(initialError);
+  const [draft, setDraft] = useState(() =>
+    initialStatus ? JSON.stringify(initialStatus.baseline, null, 2) : "",
+  );
+  const [busy, setBusy] = useState(false);
 
   async function save() {
     setBusy(true);
@@ -39,7 +28,7 @@ export function BaselinePanel() {
     try {
       const trimmed = draft.trim();
       const saved = trimmed.startsWith("{")
-        ? await putBaseline(JSON.parse(trimmed) as never)
+        ? await putBaseline(parseJsonBaseline(trimmed))
         : await putBaselineText(trimmed);
       setStatus(saved);
       setDraft(JSON.stringify(saved.baseline, null, 2));
@@ -85,4 +74,14 @@ export function BaselinePanel() {
       {error ? <p role="alert">{error}</p> : null}
     </section>
   );
+}
+
+function parseJsonBaseline(text: string) {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text) as unknown;
+  } catch {
+    throw new Error("Invalid JSON");
+  }
+  return parseBaselineImport(parsed);
 }

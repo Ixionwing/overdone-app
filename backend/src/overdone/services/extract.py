@@ -1,10 +1,24 @@
 from __future__ import annotations
 
 import inspect
+import logging
 import re
+
+from pydantic import ValidationError
+from pydantic_ai import AgentRunError
 
 from overdone.schemas.dto import ExtractedPrompt, PromptKind, ProposedItem, Unit
 from overdone.services.units import to_kg
+
+logger = logging.getLogger(__name__)
+
+_LLM_FALLBACK = (
+    TimeoutError,
+    ConnectionError,
+    OSError,
+    ValidationError,
+    AgentRunError,
+)
 
 _FATIGUE = re.compile(
     r"(slept\s+\d+\s+hours(?:[^,.]*beat up)?|feel beat up|beat up)",
@@ -179,7 +193,15 @@ async def extract_prompt(
                 if inspect.isawaitable(result):
                     result = await result
                 if isinstance(result, ExtractedPrompt):
-                    return result
-            except Exception:
-                pass
+                    return _without_catalog_ids(result)
+            except _LLM_FALLBACK:
+                logger.warning(
+                    "llm extract failed; falling back to heuristic",
+                    exc_info=True,
+                )
     return extract_heuristic(text)
+
+
+def _without_catalog_ids(extracted: ExtractedPrompt) -> ExtractedPrompt:
+    items = [item.model_copy(update={"exercise_id": None}) for item in extracted.items]
+    return extracted.model_copy(update={"items": items})

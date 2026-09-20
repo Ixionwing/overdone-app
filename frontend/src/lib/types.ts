@@ -8,6 +8,7 @@ export type BaselineSet = {
   reps: number;
   sets: number;
   unit?: string | null;
+  exercise_id?: string | null;
 };
 
 export type BaselineSession = {
@@ -20,8 +21,10 @@ export type BaselineBenchmark = {
   exercise: string;
   one_rm: number;
   unit?: string | null;
+  exercise_id?: string | null;
 };
 
+/** Keep fields aligned with backend/src/overdone/schemas/api.py. */
 export type BaselineImport = {
   preferred_unit: string;
   benchmarks: BaselineBenchmark[];
@@ -51,6 +54,7 @@ export type ItemVerdict = {
   light: TrafficLight;
   factors: FactorScores;
   narrative: string;
+  catalog_source_id: string | null;
 };
 
 export type WarningFlag = {

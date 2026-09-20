@@ -11,6 +11,7 @@ class ImportSet(BaseModel):
     reps: int
     sets: int = 1
     unit: str | None = None
+    exercise_id: str | None = None
 
 
 class ImportSession(BaseModel):
@@ -27,6 +28,7 @@ class ImportBenchmark(BaseModel):
     exercise: str
     one_rm: float
     unit: str | None = None
+    exercise_id: str | None = None
 
 
 class BaselineImport(BaseModel):

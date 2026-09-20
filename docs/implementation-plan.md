@@ -4,9 +4,9 @@
 
 **Goal:** Ship a local Compose stack (Postgres/pgvector + FastAPI/FastMCP + Next.js) that ingests a static training baseline, evaluates a natural-language workout increment, and returns Green/Yellow/Red plus gauges without storing prompt history.
 
-**Architecture:** One FastAPI process owns HTTP and mounted FastMCP. LlamaIndex writes exercise (and note) embeddings to pgvector; Pydantic AI retrieval reads them. Scoring and narratives are pure Python. Baseline is the only user write.
+**Architecture:** One FastAPI process owns HTTP and mounted FastMCP. LlamaIndex writes exercise (and note) embeddings to pgvector; `retrieve_context` reads them over SQL. Scoring and narratives are pure Python. Baseline is the only user write.
 
-**Tech stack:** Python 3.12, FastAPI, FastMCP, SQLAlchemy 2.x, Alembic, LlamaIndex PGVectorStore, Pydantic AI, sentence-transformers `all-MiniLM-L6-v2`, PostgreSQL 16 + pgvector, Next.js App Router, Docker Compose.
+**Tech stack:** Python 3.12, FastAPI, FastMCP, SQLAlchemy 2.x, Alembic, LlamaIndex ingest writer, optional Pydantic AI extractor, sentence-transformers `all-MiniLM-L6-v2`, PostgreSQL 16 + pgvector, Next.js App Router, Docker Compose.
 
 **Companion spec:** `docs/technical-spec.md`. `product-spec.md` wins on product behavior.
 
@@ -221,7 +221,7 @@ Expected: `vector` listed; `exercises`, `exercise_enrichment`, `exercise_aliases
 
 - [ ] **Step 2: `GET /health` pings DB** — 503 when DB is down. Test with TestClient + Postgres fixture. Do not use SQLite.
 
-`data_embeddings` columns must match LlamaIndex `PGVectorStore` for the chosen library version before freezing the revision.
+`data_embeddings` is owned by Alembic; LlamaIndex writes through `OverdoneVectorStore` and must not create a second schema.
 
 ### Task B2: Baseline replace/read + text import
 
@@ -348,7 +348,7 @@ Verify: `cd backend && pytest tests/test_scoring.py tests/test_narrative.py -v`
 
 **Interfaces:** `async def extract_prompt(text: str, *, llm_client: object | None = None) -> ExtractedPrompt`
 
-Tests always pass `llm_client=None`. Mixed-unit halt is **not** the extractor’s job; omitted unit → `unit=None`.
+Tests pass `llm_client=None` for the heuristic matrix; fakes cover timeout/validation fallback and unexpected errors. Mixed-unit halt is **not** the extractor’s job; omitted unit → `unit=None`.
 
 Assert the product-spec prompt set: +20 lb single item; three-item session; 225 squat / `weeks=4`; fatigue copied; substitution flag; `"Add 200 to Bench"` has `unit=None`.
 
