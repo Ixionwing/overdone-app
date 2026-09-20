@@ -4,7 +4,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from overdone.ingest.embed import embed_query, embed_texts
+from overdone.ingest.embed import embed_query
 from overdone.models.embeddings import DataEmbedding
 from overdone.models.exercise import Exercise, ExerciseAlias
 
@@ -39,45 +39,33 @@ def resolve_from_baseline(name: str, baseline_names: list[str]) -> str | None:
     return None
 
 
-def _cosine(left: list[float], right: list[float]) -> float:
-    dot = sum(a * b for a, b in zip(left, right, strict=True))
-    norm_l = sum(a * a for a in left) ** 0.5
-    norm_r = sum(b * b for b in right) ** 0.5
-    if norm_l == 0 or norm_r == 0:
-        return 0.0
-    return dot / (norm_l * norm_r)
-
-
-async def _embed_name_nearest(session: AsyncSession, name: str) -> str | None:
-    rows = list(
-        (
-            await session.scalars(
-                select(Exercise).options(selectinload(Exercise.aliases))
-            )
-        ).all()
-    )
-    if not rows:
-        return None
-    labels: list[tuple[str, str]] = []
-    texts: list[str] = []
-    for exercise in rows:
-        labels.append((str(exercise.id), exercise.name))
-        texts.append(exercise.name)
-        for alias in exercise.aliases:
-            labels.append((str(exercise.id), alias.alias))
-            texts.append(alias.alias)
+async def _nearest_kind(session: AsyncSession, name: str, kind: str) -> str | None:
     query = embed_query(name)
-    vectors = embed_texts(texts)
-    ranked = sorted(
-        (
-            (_cosine(query, vector), exercise_id)
-            for vector, (exercise_id, _label) in zip(vectors, labels, strict=True)
-        ),
-        reverse=True,
-    )
-    if not ranked or ranked[0][0] < SIMILARITY_THRESHOLD:
+    similarity = (1 - DataEmbedding.embedding.cosine_distance(query)).label("sim")
+    row = (
+        await session.execute(
+            select(DataEmbedding, similarity)
+            .where(DataEmbedding.metadata_["kind"].astext == kind)
+            .order_by(DataEmbedding.embedding.cosine_distance(query))
+            .limit(1)
+        )
+    ).first()
+    if row is None:
         return None
-    return ranked[0][1]
+    chunk, score = row
+    if float(score) < SIMILARITY_THRESHOLD:
+        return None
+    meta = chunk.metadata_ or {}
+    if meta.get("exercise_id"):
+        return str(meta["exercise_id"])
+    source_id = meta.get("source_id")
+    if source_id:
+        matched = await session.scalar(
+            select(Exercise).where(Exercise.source_id == source_id)
+        )
+        if matched is not None:
+            return str(matched.id)
+    return None
 
 
 async def resolve_exercise_name(session: AsyncSession, name: str) -> str | None:
@@ -94,31 +82,9 @@ async def resolve_exercise_name(session: AsyncSession, name: str) -> str | None:
     )
     if exact is not None:
         return str(exact.id)
-
-    query = embed_query(name)
-    similarity = (1 - DataEmbedding.embedding.cosine_distance(query)).label("sim")
-    row = (
-        await session.execute(
-            select(DataEmbedding, similarity)
-            .where(DataEmbedding.metadata_["kind"].astext == "exercise")
-            .order_by(DataEmbedding.embedding.cosine_distance(query))
-            .limit(1)
-        )
-    ).first()
-    if row is not None:
-        chunk, score = row
-        if float(score) >= SIMILARITY_THRESHOLD:
-            meta = chunk.metadata_ or {}
-            if meta.get("exercise_id"):
-                return str(meta["exercise_id"])
-            source_id = meta.get("source_id")
-            if source_id:
-                matched = await session.scalar(
-                    select(Exercise).where(Exercise.source_id == source_id)
-                )
-                if matched is not None:
-                    return str(matched.id)
-    return await _embed_name_nearest(session, name)
+    return await _nearest_kind(session, name, "exercise") or await _nearest_kind(
+        session, name, "exercise_name"
+    )
 
 
 async def history_name_for_catalog(

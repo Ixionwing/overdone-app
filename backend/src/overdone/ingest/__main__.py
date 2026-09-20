@@ -9,12 +9,6 @@ from overdone.config import settings
 from overdone.db import create_engine, create_session_factory
 from overdone.ingest.catalog import seed_catalog
 
-_ROOT = Path(__file__).resolve().parents[4]
-_DEFAULTS = (
-    _ROOT / "data" / "free-exercise-db" / "exercises.json",
-    _ROOT / "backend" / "tests" / "fixtures" / "exercises_mini.json",
-)
-
 
 async def _run(path: Path) -> int:
     exercises = json.loads(path.read_text())
@@ -34,7 +28,7 @@ def main() -> None:
     parser.add_argument(
         "--path",
         type=Path,
-        default=next((item for item in _DEFAULTS if item.exists()), _DEFAULTS[-1]),
+        default=settings.resolved_catalog_path(),
     )
     args = parser.parse_args()
     count = asyncio.run(_run(args.path))

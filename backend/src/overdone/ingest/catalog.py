@@ -1,24 +1,15 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from overdone.config import settings
 from overdone.ingest.embed import embed_texts
-from overdone.ingest.vectorstore import OverdoneVectorStore, exercise_node
+from overdone.ingest.vectorstore import OverdoneVectorStore, exercise_node, name_node
 from overdone.models.exercise import Exercise, ExerciseAlias, ExerciseEnrichment
-
-
-def _rules_path() -> Path:
-    for parent in Path(__file__).resolve().parents:
-        candidate = parent / "data" / "enrichment_rules.json"
-        if candidate.exists():
-            return candidate
-    return Path.cwd() / "data" / "enrichment_rules.json"
-
 
 _JOINTS = ("shoulder", "knee", "spine", "elbow")
 _PRESS_MUSCLES = {"chest", "shoulders", "triceps"}
@@ -35,7 +26,7 @@ def _as_list(value: Any) -> list[str]:
 
 
 def _load_rules() -> dict[str, Any]:
-    path = _rules_path()
+    path = settings.resolved_enrichment_rules_path()
     if not path.exists():
         return {"aliases": {}, "by_source_id": {}, "defaults": {}}
     return json.loads(path.read_text())
@@ -111,10 +102,25 @@ def _chunk_text(exercise: dict[str, Any], factors: dict[str, Any]) -> str:
 async def seed_catalog(session: AsyncSession, exercises: list[dict[str, Any]]) -> int:
     rules = _load_rules()
     store = OverdoneVectorStore(session=session)
-    texts = [_chunk_text(item, enrichment_for(item, rules)) for item in exercises]
-    embeddings = embed_texts(texts) if texts else []
+    chunk_texts = [_chunk_text(item, enrichment_for(item, rules)) for item in exercises]
+    name_specs: list[tuple[str, str, str]] = []
+    for item in exercises:
+        source_id = str(item.get("id") or item.get("source_id") or "")
+        name = str(item.get("name") or "")
+        name_specs.append((source_id, name, "name"))
+        for alias in (rules.get("aliases") or {}).get(source_id, []):
+            name_specs.append((source_id, str(alias), f"alias:{alias}"))
+    embeddings = (
+        embed_texts([*chunk_texts, *[spec[1] for spec in name_specs]])
+        if chunk_texts or name_specs
+        else []
+    )
+    chunk_vectors = embeddings[: len(chunk_texts)]
+    name_vectors = embeddings[len(chunk_texts) :]
 
-    for item, text, embedding in zip(exercises, texts, embeddings, strict=True):
+    for item, text, embedding in zip(
+        exercises, chunk_texts, chunk_vectors, strict=True
+    ):
         source_id = str(item.get("id") or item.get("source_id") or "")
         if not source_id:
             raise ValueError("exercise is missing id")
@@ -160,6 +166,19 @@ async def seed_catalog(session: AsyncSession, exercises: list[dict[str, Any]]) -
                 session.add(ExerciseAlias(exercise_id=existing.id, alias=alias))
 
         await store.adelete(source_id)
+        name_nodes = [
+            name_node(
+                source_id=source_id,
+                exercise_id=str(existing.id),
+                text=label_text,
+                embedding=vector,
+                label=label,
+            )
+            for (spec_source, label_text, label), vector in zip(
+                name_specs, name_vectors, strict=True
+            )
+            if spec_source == source_id
+        ]
         await store.async_add(
             [
                 exercise_node(
@@ -167,7 +186,8 @@ async def seed_catalog(session: AsyncSession, exercises: list[dict[str, Any]]) -
                     exercise_id=str(existing.id),
                     text=text,
                     embedding=embedding,
-                )
+                ),
+                *name_nodes,
             ]
         )
 

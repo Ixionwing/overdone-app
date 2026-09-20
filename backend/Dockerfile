@@ -10,24 +10,31 @@ ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
     UV_PYTHON_DOWNLOADS=0
 
-COPY pyproject.toml uv.lock ./
+COPY backend/pyproject.toml backend/uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 
-COPY src ./src
+COPY backend/src ./src
 RUN uv sync --frozen --no-dev
 
 FROM python:3.12.11-slim-bookworm AS runtime
 
 RUN groupadd --gid 1000 app \
-    && useradd --uid 1000 --gid app --create-home app
+    && useradd --uid 1000 --gid app --create-home app \
+    && mkdir -p /home/app/.cache/huggingface \
+    && chown -R app:app /home/app/.cache
 
 WORKDIR /app
 
 COPY --from=builder /app/.venv /app/.venv
 COPY --from=builder /app/src /app/src
+COPY backend/alembic /app/alembic
+COPY backend/alembic.ini /app/alembic.ini
+COPY data /app/data
 
 ENV PATH="/app/.venv/bin:$PATH" \
-    PYTHONPATH="/app/src"
+    PYTHONPATH="/app/src" \
+    HF_HOME="/home/app/.cache/huggingface" \
+    DATA_DIR="/app/data"
 
 USER app
 

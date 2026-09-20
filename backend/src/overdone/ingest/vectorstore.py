@@ -56,6 +56,7 @@ class OverdoneVectorStore(BasePydanticVectorStore):
         )
 
     def query(self, query: VectorStoreQuery, **kwargs: Any) -> VectorStoreQueryResult:
+        """Reads go through retrieve_context, not this LlamaIndex query()."""
         del query, kwargs
         return VectorStoreQueryResult(nodes=[], similarities=[], ids=[])
 
@@ -72,6 +73,29 @@ def exercise_node(
         id_=source_id,
         metadata={
             "kind": "exercise",
+            "source_id": source_id,
+            "exercise_id": exercise_id,
+            "ref_doc_id": source_id,
+        },
+    )
+    node.embedding = embedding
+    return node
+
+
+def name_node(
+    *,
+    source_id: str,
+    exercise_id: str,
+    text: str,
+    embedding: list[float],
+    label: str,
+) -> TextNode:
+    node_id = f"{source_id}::name::{label}"
+    node = TextNode(
+        text=text,
+        id_=node_id,
+        metadata={
+            "kind": "exercise_name",
             "source_id": source_id,
             "exercise_id": exercise_id,
             "ref_doc_id": source_id,

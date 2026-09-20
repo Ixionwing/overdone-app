@@ -1,6 +1,6 @@
 from datetime import date
 
-from sqlalchemy import Date, ForeignKey, Integer, String, Text
+from sqlalchemy import CheckConstraint, Date, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from overdone.models.base import Base
@@ -8,6 +8,9 @@ from overdone.models.base import Base
 
 class UserSettings(Base):
     __tablename__ = "user_settings"
+    __table_args__ = (
+        CheckConstraint("preferred_unit IN ('lb', 'kg')", name="preferred_unit"),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     preferred_unit: Mapped[str] = mapped_column(String(2), default="lb")
@@ -15,6 +18,7 @@ class UserSettings(Base):
 
 class UserBenchmark(Base):
     __tablename__ = "user_benchmarks"
+    __table_args__ = (CheckConstraint("unit IN ('lb', 'kg')", name="unit"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     exercise_id: Mapped[int | None] = mapped_column(
@@ -39,6 +43,7 @@ class UserSession(Base):
 
 class UserSet(Base):
     __tablename__ = "user_sets"
+    __table_args__ = (CheckConstraint("unit IN ('lb', 'kg')", name="unit"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     session_id: Mapped[int] = mapped_column(
