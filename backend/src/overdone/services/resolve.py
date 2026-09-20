@@ -39,20 +39,9 @@ def resolve_from_baseline(name: str, baseline_names: list[str]) -> str | None:
     return None
 
 
-async def _nearest_kind(session: AsyncSession, name: str, kind: str) -> str | None:
-    query = await embed_query(name)
-    similarity = (1 - DataEmbedding.embedding.cosine_distance(query)).label("sim")
-    row = (
-        await session.execute(
-            select(DataEmbedding, similarity)
-            .where(DataEmbedding.metadata_["kind"].astext == kind)
-            .order_by(DataEmbedding.embedding.cosine_distance(query))
-            .limit(1)
-        )
-    ).first()
-    if row is None:
-        return None
-    chunk, score = row
+async def _id_from_chunk(
+    session: AsyncSession, chunk: DataEmbedding, score: float
+) -> str | None:
     if float(score) < SIMILARITY_THRESHOLD:
         return None
     meta = chunk.metadata_ or {}
@@ -65,6 +54,33 @@ async def _nearest_kind(session: AsyncSession, name: str, kind: str) -> str | No
         )
         if matched is not None:
             return str(matched.id)
+    return None
+
+
+async def _nearest_catalog(session: AsyncSession, name: str) -> str | None:
+    query = await embed_query(name)
+    similarity = (1 - DataEmbedding.embedding.cosine_distance(query)).label("sim")
+    kind_col = DataEmbedding.metadata_["kind"].astext
+    rows = (
+        await session.execute(
+            select(DataEmbedding, similarity)
+            .where(kind_col.in_(("exercise", "exercise_name")))
+            .distinct(kind_col)
+            .order_by(kind_col, DataEmbedding.embedding.cosine_distance(query))
+        )
+    ).all()
+    by_kind: dict[str, tuple[DataEmbedding, float]] = {}
+    for chunk, score in rows:
+        kind = (chunk.metadata_ or {}).get("kind")
+        if isinstance(kind, str):
+            by_kind[kind] = (chunk, float(score))
+    for kind in ("exercise", "exercise_name"):
+        hit = by_kind.get(kind)
+        if hit is None:
+            continue
+        matched = await _id_from_chunk(session, *hit)
+        if matched is not None:
+            return matched
     return None
 
 
@@ -82,9 +98,7 @@ async def resolve_exercise_name(session: AsyncSession, name: str) -> str | None:
     )
     if exact is not None:
         return str(exact.id)
-    return await _nearest_kind(session, name, "exercise") or await _nearest_kind(
-        session, name, "exercise_name"
-    )
+    return await _nearest_catalog(session, name)
 
 
 async def history_name_for_catalog(
