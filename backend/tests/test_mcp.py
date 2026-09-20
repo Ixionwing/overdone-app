@@ -3,7 +3,8 @@ import json
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from fastmcp import Client
-from tests.test_evaluate_api import RICH, _put
+
+from test_evaluate_api import RICH, _put
 
 
 def _call_mcp(client: TestClient, name: str, arguments: dict) -> dict:

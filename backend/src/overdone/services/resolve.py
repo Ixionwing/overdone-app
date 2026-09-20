@@ -40,7 +40,7 @@ def resolve_from_baseline(name: str, baseline_names: list[str]) -> str | None:
 
 
 async def _nearest_kind(session: AsyncSession, name: str, kind: str) -> str | None:
-    query = embed_query(name)
+    query = await embed_query(name)
     similarity = (1 - DataEmbedding.embedding.cosine_distance(query)).label("sim")
     row = (
         await session.execute(

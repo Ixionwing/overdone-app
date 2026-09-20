@@ -66,7 +66,7 @@ async def rebuild_session_notes(session: AsyncSession) -> None:
     ]
     if not notes:
         return
-    embeddings = embed_texts([text for _row, text in notes])
+    embeddings = await embed_texts([text for _row, text in notes])
     nodes = [
         note_node(
             session_id=str(row.id),
@@ -103,7 +103,7 @@ async def _search(
     source_ids: list[str] | None = None,
     exercise_ids: list[str] | None = None,
 ) -> list[RetrievedChunk]:
-    vector = embed_query(query)
+    vector = await embed_query(query)
     similarity = (1 - DataEmbedding.embedding.cosine_distance(vector)).label("sim")
     stmt = (
         select(DataEmbedding, similarity)

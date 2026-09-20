@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 from functools import lru_cache
@@ -82,17 +83,19 @@ def _model_embed(texts: list[str], model_name: str | None) -> list[list[float]]:
     return vectors
 
 
-def _lookup_or_embed(texts: list[str], model_name: str | None) -> list[list[float]]:
+async def _lookup_or_embed(
+    texts: list[str], model_name: str | None
+) -> list[list[float]]:
     global _dirty
     if use_real_embeddings() and not recording_embeddings():
-        return _model_embed(texts, model_name)
+        return await asyncio.to_thread(_model_embed, texts, model_name)
     if _fixture_path is None and not _recording:
-        return _model_embed(texts, model_name)
+        return await asyncio.to_thread(_model_embed, texts, model_name)
     missing = [text for text in texts if text not in _fixture]
     if missing:
         if not recording_embeddings():
             raise KeyError(f"embedding fixture missing texts: {missing[:5]!r}")
-        computed = _model_embed(missing, model_name)
+        computed = await asyncio.to_thread(_model_embed, missing, model_name)
         for text, vector in zip(missing, computed, strict=True):
             _fixture[text] = vector
         _dirty = True
@@ -101,11 +104,13 @@ def _lookup_or_embed(texts: list[str], model_name: str | None) -> list[list[floa
     return vectors
 
 
-def embed_texts(texts: list[str], model_name: str | None = None) -> list[list[float]]:
+async def embed_texts(
+    texts: list[str], model_name: str | None = None
+) -> list[list[float]]:
     if not texts:
         return []
-    return _lookup_or_embed(texts, model_name)
+    return await _lookup_or_embed(texts, model_name)
 
 
-def embed_query(text: str, model_name: str | None = None) -> list[float]:
-    return _lookup_or_embed([text], model_name)[0]
+async def embed_query(text: str, model_name: str | None = None) -> list[float]:
+    return (await _lookup_or_embed([text], model_name))[0]

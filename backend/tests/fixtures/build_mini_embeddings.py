@@ -5,6 +5,7 @@ Run from backend/: uv run python tests/fixtures/build_mini_embeddings.py
 
 from __future__ import annotations
 
+import asyncio
 import json
 from pathlib import Path
 
@@ -84,7 +85,7 @@ def main() -> None:
         add(query)
 
     load_embedding_fixture(OUT, record=True)
-    embed_texts(texts)
+    asyncio.run(embed_texts(texts))
     from overdone.ingest import embed as embed_mod
 
     embed_mod._dirty = True

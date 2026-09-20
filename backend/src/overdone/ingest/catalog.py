@@ -111,7 +111,7 @@ async def seed_catalog(session: AsyncSession, exercises: list[dict[str, Any]]) -
         for alias in (rules.get("aliases") or {}).get(source_id, []):
             name_specs.append((source_id, str(alias), f"alias:{alias}"))
     embeddings = (
-        embed_texts([*chunk_texts, *[spec[1] for spec in name_specs]])
+        await embed_texts([*chunk_texts, *[spec[1] for spec in name_specs]])
         if chunk_texts or name_specs
         else []
     )
