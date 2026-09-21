@@ -3,6 +3,7 @@ import type {
   BaselineImport,
   BaselineSession,
   BaselineSet,
+  BaselineStatus,
 } from "@/lib/types";
 
 const ROOT_KEYS = new Set(["preferred_unit", "benchmarks", "sessions"]);
@@ -140,6 +141,17 @@ function parseSession(value: unknown): BaselineSession {
       value.notes === undefined ? undefined : (value.notes as string | null),
     sets: (value.sets ?? []).map(parseSet),
   };
+}
+
+export function hasStoredBaseline(status: BaselineStatus | null): boolean {
+  if (!status) {
+    return false;
+  }
+  return (
+    status.session_count > 0 ||
+    status.benchmark_count > 0 ||
+    status.set_count > 0
+  );
 }
 
 export function parseBaselineImport(value: unknown): BaselineImport {

@@ -3,20 +3,25 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --check .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
+    "@mui/material": "^9.4.0",
+    "@mui/material-pigment-css": "^9.4.0",
+    "@pigment-css/react": "^0.0.31",
     "next": "^15.5.9",
     "react": "^19.1.2",
     "react-dom": "^19.1.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@pigment-css/nextjs-plugin": "^0.0.31",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -24,6 +29,7 @@
     "eslint-config-next": "^15.5.9",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.9.8",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.4"
   }
 }

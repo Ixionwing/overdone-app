@@ -1,8 +1,7 @@
-import { BaselinePanel } from "@/components/BaselinePanel";
-import { PromptPanel } from "@/components/PromptPanel";
-import { StatusBar } from "@/components/StatusBar";
+import { Scratchpad } from "@/components/Scratchpad";
 import { getBaseline, getHealth } from "@/lib/api";
 import type { BaselineStatus, HealthStatus } from "@/lib/types";
+import { pageLead, pageMain, pageTitle } from "@/theme/layout";
 
 export const dynamic = "force-dynamic";
 
@@ -23,12 +22,38 @@ export default async function Home() {
   );
 
   return (
-    <main>
-      <h1>Overdone</h1>
-      <p>Diagnostic scratchpad — evaluate a proposed increment</p>
-      <StatusBar health={health} error={error} />
-      <BaselinePanel initialStatus={baseline} initialError={baselineError} />
-      <PromptPanel />
+    <BoxPage
+      health={health}
+      error={error}
+      baseline={baseline}
+      baselineError={baselineError}
+    />
+  );
+}
+
+function BoxPage({
+  health,
+  error,
+  baseline,
+  baselineError,
+}: {
+  health: HealthStatus | null;
+  error: string | null;
+  baseline: BaselineStatus | null;
+  baselineError: string | null;
+}) {
+  return (
+    <main id="main" className={pageMain}>
+      <h1 className={pageTitle}>Overdone</h1>
+      <p className={pageLead}>
+        Diagnostic scratchpad for a proposed training increment.
+      </p>
+      <Scratchpad
+        health={health}
+        healthError={error}
+        baseline={baseline}
+        baselineError={baselineError}
+      />
     </main>
   );
 }

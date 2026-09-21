@@ -1,3 +1,5 @@
+import { alert, col, mute, row } from "@/theme/layout";
+import { healthAlert } from "@/lib/health";
 import type { HealthStatus } from "@/lib/types";
 
 type StatusBarProps = {
@@ -6,20 +8,26 @@ type StatusBarProps = {
 };
 
 export function StatusBar({ health, error }: StatusBarProps) {
-  const apiOk = health?.status === "ok";
+  const message = healthAlert(error, health);
+
+  if (message) {
+    return (
+      <p className={alert} role="alert">
+        {message}
+      </p>
+    );
+  }
 
   return (
-    <section aria-label="System status">
-      <p>
-        <strong>API:</strong> {apiOk ? "reachable" : "unreachable"}
-      </p>
-      <p>
-        <strong>Health payload:</strong>{" "}
-        {error ? error : JSON.stringify(health)}
-      </p>
-      <p>
-        <strong>Database:</strong> {apiOk ? "reachable" : "unreachable"}
-      </p>
+    <section className={row} aria-label="System Status">
+      <div className={col}>
+        <p className={mute}>API</p>
+        <p style={{ margin: 0 }}>Reachable</p>
+      </div>
+      <div className={col}>
+        <p className={mute}>Database</p>
+        <p style={{ margin: 0 }}>Reachable</p>
+      </div>
     </section>
   );
 }

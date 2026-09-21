@@ -4,6 +4,7 @@ import type {
   EvaluationResult,
   HealthStatus,
 } from "@/lib/types";
+import { parseEvaluationResult } from "@/lib/evaluate";
 
 export type { BaselineImport, BaselineStatus, EvaluationResult, HealthStatus };
 
@@ -11,7 +12,7 @@ function apiBaseUrl(): string {
   return (
     process.env.API_URL ??
     process.env.NEXT_PUBLIC_API_URL ??
-    "http://localhost:8000"
+    "http://127.0.0.1:8000"
   );
 }
 
@@ -22,10 +23,25 @@ function resourceUrl(path: string): string {
   return path;
 }
 
+async function errorMessage(
+  response: Response,
+  fallback: string,
+): Promise<string> {
+  try {
+    const body = (await response.json()) as { detail?: unknown };
+    if (typeof body.detail === "string") {
+      return body.detail;
+    }
+  } catch {
+    /* use fallback */
+  }
+  return `${fallback} (${response.status})`;
+}
+
 export async function getHealth(): Promise<HealthStatus> {
   const response = await fetch(`${apiBaseUrl()}/health`, { cache: "no-store" });
   if (!response.ok) {
-    throw new Error(`Health check failed (${response.status})`);
+    throw new Error(await errorMessage(response, "Health check failed"));
   }
   return (await response.json()) as HealthStatus;
 }
@@ -77,20 +93,5 @@ export async function evaluatePrompt(
   if (!response.ok) {
     throw new Error(await errorMessage(response, "Failed to evaluate prompt"));
   }
-  return (await response.json()) as EvaluationResult;
-}
-
-async function errorMessage(
-  response: Response,
-  fallback: string,
-): Promise<string> {
-  try {
-    const body = (await response.json()) as { detail?: unknown };
-    if (typeof body.detail === "string") {
-      return body.detail;
-    }
-  } catch {
-    /* use fallback */
-  }
-  return `${fallback} (${response.status})`;
+  return parseEvaluationResult(await response.json());
 }

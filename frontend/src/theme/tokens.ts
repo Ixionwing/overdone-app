@@ -1,0 +1,17 @@
+export const tokens = {
+  mist: "#E6ECF0",
+  paper: "#F5F8FA",
+  ink: "#1F2A30",
+  mute: "#5A6A73",
+  steel: "#C5CED4",
+  track: "#D5DCE0",
+  bar: "#3A5368",
+  barHover: "#2E4254",
+  housing: "#2A3136",
+  lampOff: "#1a1f22",
+  go: "#1B7A45",
+  caution: "#B8860B",
+  halt: "#A61B1B",
+  alertWash: "#F8EDED",
+  warningWash: "#F7F1DE",
+} as const;
