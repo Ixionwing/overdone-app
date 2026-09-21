@@ -62,7 +62,4 @@ OVERDONE_LIVE_EXTRACT=1 uv run python scripts/eval_extract_live.py
 
 ## Specs
 
-- Product: `docs/product-spec.md`
-- Technical: `docs/technical-spec.md`
-- Slice plan: `docs/implementation-plan.md`
 - Extract gold (human): `docs/golden-extract-dataset.md`
