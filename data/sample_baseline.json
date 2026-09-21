@@ -3,21 +3,546 @@
   "benchmarks": [
     {
       "exercise": "Barbell Bench Press - Medium Grip",
-      "one_rm": 225,
+      "one_rm": 225.0,
+      "unit": "lb"
+    },
+    {
+      "exercise": "Standing Military Press",
+      "one_rm": 135.0,
+      "unit": "lb"
+    },
+    {
+      "exercise": "Barbell Squat",
+      "one_rm": 315.0,
+      "unit": "lb"
+    },
+    {
+      "exercise": "Barbell Deadlift",
+      "one_rm": 365.0,
       "unit": "lb"
     }
   ],
   "sessions": [
     {
-      "date": "2026-09-13",
+      "date": "2026-09-07",
+      "sets": [
+        {
+          "exercise": "Barbell Bench Press - Medium Grip",
+          "weight": 185.0,
+          "reps": 5,
+          "sets": 4,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Standing Military Press",
+          "weight": 95.0,
+          "reps": 10,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Incline Dumbbell Press",
+          "weight": 50.0,
+          "reps": 10,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Side Lateral Raise",
+          "weight": 20.0,
+          "reps": 15,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Cable Pushdown",
+          "weight": 40.0,
+          "reps": 12,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Cable Rope Overhead Triceps Extension",
+          "weight": 35.0,
+          "reps": 12,
+          "sets": 3,
+          "unit": "lb"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-08",
+      "sets": [
+        {
+          "exercise": "Barbell Deadlift",
+          "weight": 275.0,
+          "reps": 5,
+          "sets": 1,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Bent Over Barbell Row",
+          "weight": 155.0,
+          "reps": 5,
+          "sets": 4,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Wide-Grip Lat Pulldown",
+          "weight": 120.0,
+          "reps": 10,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Face Pull",
+          "weight": 40.0,
+          "reps": 15,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Dumbbell Bicep Curl",
+          "weight": 30.0,
+          "reps": 10,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Hammer Curls",
+          "weight": 30.0,
+          "reps": 10,
+          "sets": 3,
+          "unit": "lb"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-09",
+      "sets": [
+        {
+          "exercise": "Barbell Squat",
+          "weight": 225.0,
+          "reps": 5,
+          "sets": 4,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Romanian Deadlift",
+          "weight": 185.0,
+          "reps": 8,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Leg Press",
+          "weight": 270.0,
+          "reps": 10,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Lying Leg Curls",
+          "weight": 70.0,
+          "reps": 12,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Standing Barbell Calf Raise",
+          "weight": 135.0,
+          "reps": 10,
+          "sets": 5,
+          "unit": "lb"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-10",
+      "sets": [
+        {
+          "exercise": "Standing Military Press",
+          "weight": 95.0,
+          "reps": 5,
+          "sets": 4,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Barbell Bench Press - Medium Grip",
+          "weight": 165.0,
+          "reps": 8,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Incline Dumbbell Press",
+          "weight": 50.0,
+          "reps": 10,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Side Lateral Raise",
+          "weight": 20.0,
+          "reps": 15,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Cable Pushdown",
+          "weight": 40.0,
+          "reps": 12,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Cable Rope Overhead Triceps Extension",
+          "weight": 35.0,
+          "reps": 12,
+          "sets": 3,
+          "unit": "lb"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-11",
+      "sets": [
+        {
+          "exercise": "Bent Over Barbell Row",
+          "weight": 155.0,
+          "reps": 5,
+          "sets": 4,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Wide-Grip Lat Pulldown",
+          "weight": 120.0,
+          "reps": 10,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Face Pull",
+          "weight": 40.0,
+          "reps": 15,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Dumbbell Bicep Curl",
+          "weight": 30.0,
+          "reps": 10,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Hammer Curls",
+          "weight": 30.0,
+          "reps": 10,
+          "sets": 3,
+          "unit": "lb"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-12",
+      "sets": [
+        {
+          "exercise": "Barbell Squat",
+          "weight": 205.0,
+          "reps": 8,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Romanian Deadlift",
+          "weight": 185.0,
+          "reps": 8,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Leg Press",
+          "weight": 270.0,
+          "reps": 10,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Lying Leg Curls",
+          "weight": 70.0,
+          "reps": 12,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Standing Barbell Calf Raise",
+          "weight": 135.0,
+          "reps": 10,
+          "sets": 5,
+          "unit": "lb"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-14",
       "notes": "Right shoulder felt tight on set 3",
       "sets": [
         {
           "exercise": "Barbell Bench Press - Medium Grip",
-          "weight": 185,
-          "unit": "lb",
+          "weight": 190.0,
           "reps": 5,
-          "sets": 4
+          "sets": 4,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Standing Military Press",
+          "weight": 95.0,
+          "reps": 10,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Incline Dumbbell Press",
+          "weight": 55.0,
+          "reps": 10,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Side Lateral Raise",
+          "weight": 20.0,
+          "reps": 15,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Cable Pushdown",
+          "weight": 45.0,
+          "reps": 12,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Cable Rope Overhead Triceps Extension",
+          "weight": 35.0,
+          "reps": 12,
+          "sets": 3,
+          "unit": "lb"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-15",
+      "sets": [
+        {
+          "exercise": "Barbell Deadlift",
+          "weight": 285.0,
+          "reps": 5,
+          "sets": 1,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Bent Over Barbell Row",
+          "weight": 160.0,
+          "reps": 5,
+          "sets": 4,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Wide-Grip Lat Pulldown",
+          "weight": 130.0,
+          "reps": 10,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Face Pull",
+          "weight": 45.0,
+          "reps": 15,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Dumbbell Bicep Curl",
+          "weight": 30.0,
+          "reps": 10,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Hammer Curls",
+          "weight": 35.0,
+          "reps": 10,
+          "sets": 3,
+          "unit": "lb"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-16",
+      "sets": [
+        {
+          "exercise": "Barbell Squat",
+          "weight": 230.0,
+          "reps": 5,
+          "sets": 4,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Romanian Deadlift",
+          "weight": 195.0,
+          "reps": 8,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Leg Press",
+          "weight": 290.0,
+          "reps": 10,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Lying Leg Curls",
+          "weight": 80.0,
+          "reps": 12,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Standing Barbell Calf Raise",
+          "weight": 145.0,
+          "reps": 10,
+          "sets": 5,
+          "unit": "lb"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-17",
+      "sets": [
+        {
+          "exercise": "Standing Military Press",
+          "weight": 100.0,
+          "reps": 5,
+          "sets": 4,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Barbell Bench Press - Medium Grip",
+          "weight": 170.0,
+          "reps": 8,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Incline Dumbbell Press",
+          "weight": 55.0,
+          "reps": 10,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Side Lateral Raise",
+          "weight": 25.0,
+          "reps": 15,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Cable Pushdown",
+          "weight": 45.0,
+          "reps": 12,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Cable Rope Overhead Triceps Extension",
+          "weight": 40.0,
+          "reps": 12,
+          "sets": 3,
+          "unit": "lb"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-18",
+      "sets": [
+        {
+          "exercise": "Bent Over Barbell Row",
+          "weight": 160.0,
+          "reps": 5,
+          "sets": 4,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Wide-Grip Lat Pulldown",
+          "weight": 130.0,
+          "reps": 10,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Face Pull",
+          "weight": 45.0,
+          "reps": 15,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Dumbbell Bicep Curl",
+          "weight": 35.0,
+          "reps": 10,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Hammer Curls",
+          "weight": 35.0,
+          "reps": 10,
+          "sets": 3,
+          "unit": "lb"
+        }
+      ]
+    },
+    {
+      "date": "2026-09-19",
+      "sets": [
+        {
+          "exercise": "Barbell Squat",
+          "weight": 210.0,
+          "reps": 8,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Romanian Deadlift",
+          "weight": 195.0,
+          "reps": 8,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Leg Press",
+          "weight": 290.0,
+          "reps": 10,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Lying Leg Curls",
+          "weight": 80.0,
+          "reps": 12,
+          "sets": 3,
+          "unit": "lb"
+        },
+        {
+          "exercise": "Standing Barbell Calf Raise",
+          "weight": 145.0,
+          "reps": 10,
+          "sets": 5,
+          "unit": "lb"
         }
       ]
     }

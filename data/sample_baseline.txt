@@ -1,5 +1,84 @@
 preferred_unit: lb
 1RM Barbell Bench Press - Medium Grip: 225 lb
-2026-09-13
-notes: Right shoulder felt tight on set 3
+1RM Standing Military Press: 135 lb
+1RM Barbell Squat: 315 lb
+1RM Barbell Deadlift: 365 lb
+2026-09-07
 Barbell Bench Press - Medium Grip 4x5 @ 185 lb
+Standing Military Press 3x10 @ 95 lb
+Incline Dumbbell Press 3x10 @ 50 lb
+Side Lateral Raise 3x15 @ 20 lb
+Cable Pushdown 3x12 @ 40 lb
+Cable Rope Overhead Triceps Extension 3x12 @ 35 lb
+2026-09-08
+Barbell Deadlift 1x5 @ 275 lb
+Bent Over Barbell Row 4x5 @ 155 lb
+Wide-Grip Lat Pulldown 3x10 @ 120 lb
+Face Pull 3x15 @ 40 lb
+Dumbbell Bicep Curl 3x10 @ 30 lb
+Hammer Curls 3x10 @ 30 lb
+2026-09-09
+Barbell Squat 4x5 @ 225 lb
+Romanian Deadlift 3x8 @ 185 lb
+Leg Press 3x10 @ 270 lb
+Lying Leg Curls 3x12 @ 70 lb
+Standing Barbell Calf Raise 5x10 @ 135 lb
+2026-09-10
+Standing Military Press 4x5 @ 95 lb
+Barbell Bench Press - Medium Grip 3x8 @ 165 lb
+Incline Dumbbell Press 3x10 @ 50 lb
+Side Lateral Raise 3x15 @ 20 lb
+Cable Pushdown 3x12 @ 40 lb
+Cable Rope Overhead Triceps Extension 3x12 @ 35 lb
+2026-09-11
+Bent Over Barbell Row 4x5 @ 155 lb
+Wide-Grip Lat Pulldown 3x10 @ 120 lb
+Face Pull 3x15 @ 40 lb
+Dumbbell Bicep Curl 3x10 @ 30 lb
+Hammer Curls 3x10 @ 30 lb
+2026-09-12
+Barbell Squat 3x8 @ 205 lb
+Romanian Deadlift 3x8 @ 185 lb
+Leg Press 3x10 @ 270 lb
+Lying Leg Curls 3x12 @ 70 lb
+Standing Barbell Calf Raise 5x10 @ 135 lb
+2026-09-14
+notes: Right shoulder felt tight on set 3
+Barbell Bench Press - Medium Grip 4x5 @ 190 lb
+Standing Military Press 3x10 @ 95 lb
+Incline Dumbbell Press 3x10 @ 55 lb
+Side Lateral Raise 3x15 @ 20 lb
+Cable Pushdown 3x12 @ 45 lb
+Cable Rope Overhead Triceps Extension 3x12 @ 35 lb
+2026-09-15
+Barbell Deadlift 1x5 @ 285 lb
+Bent Over Barbell Row 4x5 @ 160 lb
+Wide-Grip Lat Pulldown 3x10 @ 130 lb
+Face Pull 3x15 @ 45 lb
+Dumbbell Bicep Curl 3x10 @ 30 lb
+Hammer Curls 3x10 @ 35 lb
+2026-09-16
+Barbell Squat 4x5 @ 230 lb
+Romanian Deadlift 3x8 @ 195 lb
+Leg Press 3x10 @ 290 lb
+Lying Leg Curls 3x12 @ 80 lb
+Standing Barbell Calf Raise 5x10 @ 145 lb
+2026-09-17
+Standing Military Press 4x5 @ 100 lb
+Barbell Bench Press - Medium Grip 3x8 @ 170 lb
+Incline Dumbbell Press 3x10 @ 55 lb
+Side Lateral Raise 3x15 @ 25 lb
+Cable Pushdown 3x12 @ 45 lb
+Cable Rope Overhead Triceps Extension 3x12 @ 40 lb
+2026-09-18
+Bent Over Barbell Row 4x5 @ 160 lb
+Wide-Grip Lat Pulldown 3x10 @ 130 lb
+Face Pull 3x15 @ 45 lb
+Dumbbell Bicep Curl 3x10 @ 35 lb
+Hammer Curls 3x10 @ 35 lb
+2026-09-19
+Barbell Squat 3x8 @ 210 lb
+Romanian Deadlift 3x8 @ 195 lb
+Leg Press 3x10 @ 290 lb
+Lying Leg Curls 3x12 @ 80 lb
+Standing Barbell Calf Raise 5x10 @ 145 lb

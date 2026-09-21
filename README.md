@@ -13,7 +13,7 @@ docker compose up --build
 - API: http://localhost:8000/health
 - MCP: http://localhost:8000/mcp
 
-API startup migrates Postgres and seeds `data/free-exercise-db/exercises.json` (yuhonas/free-exercise-db, Unlicense) when the catalog is empty. MiniLM weights live in the `hf_cache` volume. Tests still use the mini fixture.
+API startup migrates Postgres and seeds `data/free-exercise-db/exercises.json` (yuhonas/free-exercise-db, Unlicense) when the catalog is empty. MiniLM weights live in the `hf_cache` volume. Tests still use the mini fixture, which includes the lifts in the sample log.
 
 Extract requires a local OpenAI-compatible server (`OLLAMA_BASE_URL`). Host Ollama is enough; Compose can still start a container with `docker compose --profile llm up --build` and `OLLAMA_BASE_URL=http://ollama:11434/v1` on the API. There is no regex extractor — the API will not start if the URL is unset. The model fills a slim native-unit draft; Python maps to kilograms and scores the named sets×reps on macros (not a synthetic 3×5).
 
@@ -39,7 +39,11 @@ cd backend && uv run pytest -v
 cd frontend && npm test && npm run typecheck
 ```
 
-`npm test` is Vitest on the JSON parsers and copy helpers. Pytest uses a fixture embedding map and does not download MiniLM or call Ollama.
+`npm test` is Vitest on the JSON parsers and copy helpers. Pytest uses a fixture embedding map and does not download MiniLM or call Ollama. If you add names to the sample log, extend `backend/tests/fixtures/exercises_mini.json` and regenerate vectors with `uv run python tests/fixtures/build_mini_embeddings.py`.
+
+## Sample baseline
+
+`data/sample_baseline.txt` and `data/sample_baseline.json` are the same two-week Metallicadpa-style PPL log (PPLPPL, rest Sunday): Push A/B, Pull A/B, Legs A/B, with linear progress on the compounds. Paste either into Baseline. Deadlift is Pull A only. The shoulder note sits on the week-2 Push A bench.
 
 ## Gold extract set
 

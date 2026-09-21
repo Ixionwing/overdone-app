@@ -6,8 +6,13 @@
     "level": "intermediate",
     "mechanic": "compound",
     "equipment": "barbell",
-    "primaryMuscles": ["chest"],
-    "secondaryMuscles": ["shoulders", "triceps"],
+    "primaryMuscles": [
+      "chest"
+    ],
+    "secondaryMuscles": [
+      "shoulders",
+      "triceps"
+    ],
     "instructions": [
       "Lie on a flat bench with a medium grip.",
       "Lower the bar to the chest and press to lockout."
@@ -21,8 +26,13 @@
     "level": "intermediate",
     "mechanic": "compound",
     "equipment": "dumbbell",
-    "primaryMuscles": ["chest"],
-    "secondaryMuscles": ["shoulders", "triceps"],
+    "primaryMuscles": [
+      "chest"
+    ],
+    "secondaryMuscles": [
+      "shoulders",
+      "triceps"
+    ],
     "instructions": [
       "Press dumbbells from an incline bench."
     ],
@@ -35,7 +45,9 @@
     "level": "beginner",
     "mechanic": "isolation",
     "equipment": "cable",
-    "primaryMuscles": ["triceps"],
+    "primaryMuscles": [
+      "triceps"
+    ],
     "secondaryMuscles": [],
     "instructions": [
       "Push a cable attachment down until the elbows are straight."
@@ -49,8 +61,13 @@
     "level": "intermediate",
     "mechanic": "compound",
     "equipment": "barbell",
-    "primaryMuscles": ["quadriceps"],
-    "secondaryMuscles": ["glutes", "lower back"],
+    "primaryMuscles": [
+      "quadriceps"
+    ],
+    "secondaryMuscles": [
+      "glutes",
+      "lower back"
+    ],
     "instructions": [
       "Squat with a barbell on the upper back."
     ],
@@ -63,10 +80,235 @@
     "level": "intermediate",
     "mechanic": "compound",
     "equipment": "barbell",
-    "primaryMuscles": ["shoulders"],
-    "secondaryMuscles": ["triceps"],
+    "primaryMuscles": [
+      "shoulders"
+    ],
+    "secondaryMuscles": [
+      "triceps"
+    ],
     "instructions": [
       "Press a barbell overhead from the shoulders."
+    ],
+    "category": "strength"
+  },
+  {
+    "id": "Side_Lateral_Raise",
+    "name": "Side Lateral Raise",
+    "force": "push",
+    "level": "beginner",
+    "mechanic": "isolation",
+    "equipment": "dumbbell",
+    "primaryMuscles": [
+      "shoulders"
+    ],
+    "secondaryMuscles": [],
+    "instructions": [
+      "Raise dumbbells to the sides until the arms are parallel to the floor."
+    ],
+    "category": "strength"
+  },
+  {
+    "id": "Cable_Rope_Overhead_Triceps_Extension",
+    "name": "Cable Rope Overhead Triceps Extension",
+    "force": "push",
+    "level": "beginner",
+    "mechanic": "isolation",
+    "equipment": "cable",
+    "primaryMuscles": [
+      "triceps"
+    ],
+    "secondaryMuscles": [],
+    "instructions": [
+      "Extend a rope overhead until the elbows are straight."
+    ],
+    "category": "strength"
+  },
+  {
+    "id": "Barbell_Deadlift",
+    "name": "Barbell Deadlift",
+    "force": "pull",
+    "level": "intermediate",
+    "mechanic": "compound",
+    "equipment": "barbell",
+    "primaryMuscles": [
+      "lower back"
+    ],
+    "secondaryMuscles": [
+      "calves",
+      "forearms",
+      "glutes",
+      "hamstrings",
+      "lats",
+      "middle back",
+      "quadriceps",
+      "traps"
+    ],
+    "instructions": [
+      "Deadlift a barbell from the floor with a straight back."
+    ],
+    "category": "strength"
+  },
+  {
+    "id": "Bent_Over_Barbell_Row",
+    "name": "Bent Over Barbell Row",
+    "force": "pull",
+    "level": "beginner",
+    "mechanic": "compound",
+    "equipment": "barbell",
+    "primaryMuscles": [
+      "middle back"
+    ],
+    "secondaryMuscles": [
+      "biceps",
+      "lats",
+      "shoulders"
+    ],
+    "instructions": [
+      "Row a barbell to the torso from a hinged position."
+    ],
+    "category": "strength"
+  },
+  {
+    "id": "Wide-Grip_Lat_Pulldown",
+    "name": "Wide-Grip Lat Pulldown",
+    "force": "pull",
+    "level": "beginner",
+    "mechanic": "compound",
+    "equipment": "cable",
+    "primaryMuscles": [
+      "lats"
+    ],
+    "secondaryMuscles": [
+      "biceps",
+      "middle back",
+      "shoulders"
+    ],
+    "instructions": [
+      "Pull a wide bar down to the chest from a seated position."
+    ],
+    "category": "strength"
+  },
+  {
+    "id": "Face_Pull",
+    "name": "Face Pull",
+    "force": "pull",
+    "level": "intermediate",
+    "mechanic": "compound",
+    "equipment": "cable",
+    "primaryMuscles": [
+      "shoulders"
+    ],
+    "secondaryMuscles": [
+      "middle back"
+    ],
+    "instructions": [
+      "Pull a rope to the face with the upper arms parallel to the floor."
+    ],
+    "category": "strength"
+  },
+  {
+    "id": "Dumbbell_Bicep_Curl",
+    "name": "Dumbbell Bicep Curl",
+    "force": "pull",
+    "level": "beginner",
+    "mechanic": "isolation",
+    "equipment": "dumbbell",
+    "primaryMuscles": [
+      "biceps"
+    ],
+    "secondaryMuscles": [
+      "forearms"
+    ],
+    "instructions": [
+      "Curl dumbbells until the biceps are fully contracted."
+    ],
+    "category": "strength"
+  },
+  {
+    "id": "Hammer_Curls",
+    "name": "Hammer Curls",
+    "force": "pull",
+    "level": "beginner",
+    "mechanic": "isolation",
+    "equipment": "dumbbell",
+    "primaryMuscles": [
+      "biceps"
+    ],
+    "secondaryMuscles": [],
+    "instructions": [
+      "Curl dumbbells with a neutral grip."
+    ],
+    "category": "strength"
+  },
+  {
+    "id": "Romanian_Deadlift",
+    "name": "Romanian Deadlift",
+    "force": "pull",
+    "level": "intermediate",
+    "mechanic": "compound",
+    "equipment": "barbell",
+    "primaryMuscles": [
+      "hamstrings"
+    ],
+    "secondaryMuscles": [
+      "calves",
+      "glutes",
+      "lower back"
+    ],
+    "instructions": [
+      "Hinge a barbell down the thighs with a slight knee bend."
+    ],
+    "category": "strength"
+  },
+  {
+    "id": "Leg_Press",
+    "name": "Leg Press",
+    "force": "push",
+    "level": "beginner",
+    "mechanic": "compound",
+    "equipment": "machine",
+    "primaryMuscles": [
+      "quadriceps"
+    ],
+    "secondaryMuscles": [
+      "calves",
+      "glutes",
+      "hamstrings"
+    ],
+    "instructions": [
+      "Press the sled until the legs are extended without locking the knees."
+    ],
+    "category": "strength"
+  },
+  {
+    "id": "Lying_Leg_Curls",
+    "name": "Lying Leg Curls",
+    "force": "pull",
+    "level": "beginner",
+    "mechanic": "isolation",
+    "equipment": "machine",
+    "primaryMuscles": [
+      "hamstrings"
+    ],
+    "secondaryMuscles": [],
+    "instructions": [
+      "Curl the pad toward the glutes on a lying leg-curl machine."
+    ],
+    "category": "strength"
+  },
+  {
+    "id": "Standing_Barbell_Calf_Raise",
+    "name": "Standing Barbell Calf Raise",
+    "force": "push",
+    "level": "beginner",
+    "mechanic": "isolation",
+    "equipment": "barbell",
+    "primaryMuscles": [
+      "calves"
+    ],
+    "secondaryMuscles": [],
+    "instructions": [
+      "Raise the heels while a barbell rests on the upper back."
     ],
     "category": "strength"
   }
