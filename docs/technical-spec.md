@@ -4,7 +4,7 @@ This document turns `product-spec.md` into implementable contracts: services, sc
 
 ## 1. Decisions (confirmed 2026-09-20)
 
-1. **Extraction model.** Optional OpenAI-compatible local endpoint (`OLLAMA_BASE_URL`, model `llama3.2`) with a heuristic extractor fallback. Scoring, traffic lights, and narratives never call a model.
+1. **Extraction model.** Required OpenAI-compatible local endpoint (`OLLAMA_BASE_URL`, model `llama3.2`, timeout 30s). No heuristic fallback. Scoring, traffic lights, and narratives never call a model.
 2. **Frontend.** Next.js (App Router) + TypeScript over HTTP to FastAPI. MCP is for agents, not the browser.
 3. **Identity.** Single local user, no auth. Baseline tables are global to the compose stack.
 
@@ -38,8 +38,7 @@ Implementation is sliced in `docs/implementation-plan.md`. Each slice is a demoa
 Browser (Next.js) --HTTP JSON--> FastAPI
 Cursor / agents  --MCP (mounted)--> same FastAPI process
                                       |
-                                      +--> Pydantic AI extractor (optional LLM)
-                                      +--> heuristic extractor fallback
+                                      +--> Pydantic AI extractor (required LLM)
                                       +--> deterministic scoring
                                       +--> SQLAlchemy (logs, 1RMs, enrichment)
                                       +--> LlamaIndex ingest (exercise catalog -> pgvector)
@@ -139,6 +138,7 @@ class HaltReason(str, Enum):
     missing_baseline = "missing_baseline"
     missing_exercise = "missing_exercise"
     ambiguous_units = "ambiguous_units"
+    extract_failed = "extract_failed"
 
 
 class Unit(str, Enum):
@@ -314,9 +314,9 @@ Cold start: catalog match **and** no sets/1RM for that `exercise_id` → halt an
 
 `services/extract.py` returns `ExtractedPrompt`.
 
-1. Try Pydantic AI agent with `output_type=ExtractedPrompt` (minus `exercise_id`; resolver fills ids later).
-2. On timeout, missing model, or validation error: heuristic extractor (regex for `+/- N lb/kg`, `N sets of W`, `by next month` / `in N weeks`, fatigue phrases, substitution phrases).
-3. Tests never call the network; inject a fake model or exercise the heuristic path.
+1. Call the Pydantic AI agent with `output_type=ExtractedPrompt` (minus `exercise_id`; resolver fills ids later).
+2. On missing client, timeout, connection/validation/`AgentRunError`, empty session items, or a macro missing target → `HaltReason.extract_failed`.
+3. Tests never call the network; inject a fake extract client.
 
 **Unit guard.** If baseline sessions/benchmarks contain **both** `lb` and `kg` (after normalizing stored kg, keep original unit on the row) **and** the prompt has a magnitude with no unit → halt `ambiguous_units`. If baseline is single-unit, inherit that unit.
 
@@ -381,15 +381,19 @@ Inputs: target weight, horizon weeks (default `4` if “next month”), current 
 required_weekly_kg = (target_weight_kg - current_kg) / weeks
 ```
 
-Historical velocity: for that exercise, sort sessions by date, take last **≤ 8** sessions with the lift, compute mean weekly weight change (heaviest set). If fewer than 2 dated sessions, velocity = `0` and required > 0 → Red (no adaptation evidence).
+Historical velocity: for that exercise, sort sessions by date, take last **≤ 8** sessions with the lift, compute mean weekly weight change (heaviest set).
+
+Rate light:
 
 | Condition | Light |
 | :--- | :--- |
+| Fewer than 2 dated sessions and `required_weekly_kg ≤ 1.5` | Green (no history is not “overdone”) |
+| Fewer than 2 dated sessions and `required_weekly_kg > 1.5` | Red |
 | `required_weekly_kg ≤ 1.0 * velocity` | Green |
 | `≤ 1.5 * velocity` | Yellow |
 | else | Red |
 
-Macro gauges still report implied volume jump from current working prescription to a 3×5 at target weight (same formulas as 9.2) so the UI stays consistent. Narrative states feasibility, not a session plan.
+Macro gauges use the named target prescription when sets/reps were extracted; otherwise last working sets/reps at the target weight (same formulas as 9.2). Overall macro light is the worse of the rate light and that implied-prescription light. Narrative states feasibility, not a session plan.
 
 ### 9.5 Narrative (no LLM)
 
@@ -401,7 +405,7 @@ Scope disclaimer warning when `asks_substitution`:
 
 ## 10. RAG (query time)
 
-LlamaIndex **writes** the index. `retrieve_context` **reads** the same `data_embeddings` rows over SQL/pgvector. Pydantic AI is the optional extractor when `OLLAMA_BASE_URL` is set, not the retrieve agent. MCP tools must not re-implement ingest.
+LlamaIndex **writes** the index. `retrieve_context` **reads** the same `data_embeddings` rows over SQL/pgvector. Pydantic AI is the required extractor when `OLLAMA_BASE_URL` is set, not the retrieve agent. MCP tools must not re-implement ingest.
 
 Retrieve (k=4) for:
 
@@ -474,7 +478,7 @@ Confirm these public seams; tests do not reach into private helpers or the live 
 | Seam | How |
 | :--- | :--- |
 | Scoring + lights | Pure functions, fixture logs, literal expected % and lights |
-| Extractor heuristic | Strings from the product-spec behavior matrix |
+| Extractor | Injected fake client; fail-closed `extract_failed` |
 | Baseline replace | API `TestClient` + Postgres testcontainer / compose |
 | Evaluate orchestrator | Fake retrieve + real scoring; halt paths |
 | RAG retrieve | Fixture embeddings, assert `source_id`s |

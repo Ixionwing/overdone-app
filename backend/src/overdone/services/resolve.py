@@ -34,7 +34,8 @@ def resolve_from_baseline(name: str, baseline_names: list[str]) -> str | None:
     if len(key) < 4:
         return None
     for candidate in baseline_names:
-        if key in candidate.casefold():
+        folded = candidate.casefold()
+        if key in folded or (len(folded) >= 4 and folded in key):
             return candidate
     return None
 

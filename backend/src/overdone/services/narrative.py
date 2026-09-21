@@ -39,13 +39,15 @@ def session_narrative(
     return f"{first}. {second}."
 
 
-def macro_narrative(verdict: ItemVerdict, weeks: int) -> str:
+def macro_narrative(
+    verdict: ItemVerdict, weeks: int, *, sets: int, reps: int
+) -> str:
     first = (
         f"{verdict.exercise_name} over {weeks} weeks is {verdict.light.value} "
         f"against historical adaptation velocity"
     )
     second = (
-        f"Implied volume jump to a 3x5 at the target is "
+        f"Implied volume jump to a {sets}x{reps} at the target is "
         f"{verdict.factors.volume_jump_pct:.1f}% and this is a feasibility "
         "readout, not a programmed progression"
     )

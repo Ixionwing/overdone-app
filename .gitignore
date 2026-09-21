@@ -226,3 +226,7 @@ frontend/.env.development.local
 frontend/.env.test.local
 frontend/.env.production.local
 
+# Local agent plans (not part of the published app)
+.superpowers/
+
+

@@ -53,10 +53,30 @@ def test_macro_narrative_states_feasibility():
         ),
         narrative="",
     )
-    text = macro_narrative(verdict, weeks=4)
+    text = macro_narrative(verdict, weeks=4, sets=3, reps=5)
     assert "red" in text.lower()
     assert "4" in text
     assert "Squat" in text
+    assert "3x5" in text
+
+
+def test_macro_narrative_names_3x8_prescription():
+    verdict = ItemVerdict(
+        exercise_id="pushdown",
+        exercise_name="Cable Pushdown",
+        light=TrafficLight.green,
+        factors=FactorScores(
+            volume_jump_pct=-6.7,
+            axial_compression=1.0,
+            cns_index=1.0,
+            joint_vectors={},
+        ),
+        narrative="",
+    )
+    text = macro_narrative(verdict, weeks=4, sets=3, reps=8)
+    assert "3x8" in text
+    assert "3x5" not in text
+    assert "-6.7" in text
 
 
 def test_scope_disclaimer_copy():

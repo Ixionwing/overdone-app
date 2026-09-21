@@ -14,6 +14,8 @@ _RANK = {
     TrafficLight.red: 2,
 }
 _JOINTS = ("shoulder", "knee", "spine", "elbow")
+# kg/week. With no dated progression, larger required rates are still red.
+_UNKNOWN_VELOCITY_RED_KG = 1.5
 
 
 def _worse(*lights: TrafficLight) -> TrafficLight:
@@ -212,22 +214,29 @@ def score_macro(
     weekly_velocity_kg: float,
     working: LogSet,
     enrichment: ExerciseEnrichment,
+    target_sets: int | None = None,
+    target_reps: int | None = None,
 ) -> ItemVerdict:
     required_weekly = (target_kg - current_kg) / weeks if weeks else target_kg
-    if weekly_velocity_kg <= 0 and required_weekly > 0:
-        light = TrafficLight.red
+    if weekly_velocity_kg <= 0:
+        if required_weekly <= _UNKNOWN_VELOCITY_RED_KG:
+            rate_light = TrafficLight.green
+        else:
+            rate_light = TrafficLight.red
     elif required_weekly <= 1.0 * weekly_velocity_kg:
-        light = TrafficLight.green
+        rate_light = TrafficLight.green
     elif required_weekly <= 1.5 * weekly_velocity_kg:
-        light = TrafficLight.yellow
+        rate_light = TrafficLight.yellow
     else:
-        light = TrafficLight.red
+        rate_light = TrafficLight.red
+    sets = target_sets if target_sets is not None else working.sets
+    reps = target_reps if target_reps is not None else working.reps
     target_item = ProposedItem(
         exercise_name=working.exercise_name,
         exercise_id=working.exercise_id,
         weight_kg=target_kg,
-        reps=5,
-        sets=3,
+        reps=reps,
+        sets=sets,
     )
     _overall, verdicts, _factors = score_session(
         [target_item],
@@ -235,6 +244,7 @@ def score_macro(
         {working.exercise_id or working.exercise_name: enrichment},
     )
     factors = verdicts[0].factors
+    light = _worse(rate_light, verdicts[0].light)
     return ItemVerdict(
         exercise_id=working.exercise_id or working.exercise_name,
         exercise_name=working.exercise_name,

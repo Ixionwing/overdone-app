@@ -158,6 +158,27 @@ def test_macro_225_squat_next_month(client: TestClient) -> None:
     assert "red" in (body["narrative"] or "").lower()
 
 
+def test_up_to_weight_in_a_month_uses_macro_narrative(client: TestClient) -> None:
+    _put(client)
+    session = client.post(
+        "/api/v1/evaluate",
+        json={"prompt": "I want to bring my cable pushdown up to 40 lbs"},
+    )
+    horizon = client.post(
+        "/api/v1/evaluate",
+        json={"prompt": "I want to bring my cable pushdown up to 40 lbs in a month"},
+    )
+    assert session.status_code == 200
+    assert horizon.status_code == 200
+    session_body = session.json()
+    horizon_body = horizon.json()
+    assert session_body["halted"] is None
+    assert horizon_body["halted"] is None
+    assert "session risk" in (session_body["narrative"] or "").lower()
+    assert "over 4 weeks" in (horizon_body["narrative"] or "").lower()
+    assert "adaptation velocity" in (horizon_body["narrative"] or "").lower()
+
+
 def test_ohp_without_history_halts_missing_exercise(client: TestClient) -> None:
     _put(client)
     response = client.post(
@@ -294,6 +315,7 @@ def test_embedding_nickname_scores_like_bench(
 def test_evaluate_uses_injected_extract_client(client: TestClient) -> None:
     from fastapi import FastAPI
 
+    from overdone.api.deps import set_extract_client
     from overdone.schemas.dto import ExtractedPrompt, PromptKind, ProposedItem, Unit
 
     class FakeExtractor:
@@ -313,7 +335,7 @@ def test_evaluate_uses_injected_extract_client(client: TestClient) -> None:
 
     app = client.app
     assert isinstance(app, FastAPI)
-    app.state.extract_client = FakeExtractor()
+    set_extract_client(app, FakeExtractor())
     _put(client)
     response = client.post(
         "/api/v1/evaluate",
@@ -324,3 +346,26 @@ def test_evaluate_uses_injected_extract_client(client: TestClient) -> None:
     assert body["halted"] is None
     assert "pushdown" in body["items"][0]["exercise_name"].casefold()
     assert body["items"][0]["factors"]["volume_jump_pct"] != 10.8
+
+
+def test_extract_failure_halts_extract_failed(client: TestClient) -> None:
+    from fastapi import FastAPI
+
+    from overdone.api.deps import set_extract_client
+
+    class Boom:
+        async def extract(self, text: str):
+            raise TimeoutError
+
+    app = client.app
+    assert isinstance(app, FastAPI)
+    set_extract_client(app, Boom())
+    _put(client)
+    response = client.post(
+        "/api/v1/evaluate",
+        json={"prompt": "I want to add 20 lbs to my bench press tomorrow"},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["halted"]["reason"] == "extract_failed"
+    assert "Could not extract" in body["halted"]["message"]

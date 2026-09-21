@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://overdone:overdone@127.0.0.1:5432/overdone"
     ollama_base_url: str | None = None
     ollama_model: str = "llama3.2"
+    ollama_timeout_seconds: float = 30.0
     data_dir: str | None = None
     enrichment_rules_path: str | None = None
     catalog_path: str | None = None

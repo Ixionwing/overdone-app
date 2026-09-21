@@ -6,11 +6,11 @@
 
 **Architecture:** One FastAPI process owns HTTP and mounted FastMCP. LlamaIndex writes exercise (and note) embeddings to pgvector; `retrieve_context` reads them over SQL. Scoring and narratives are pure Python. Baseline is the only user write.
 
-**Tech stack:** Python 3.12, FastAPI, FastMCP, SQLAlchemy 2.x, Alembic, LlamaIndex ingest writer, optional Pydantic AI extractor, sentence-transformers `all-MiniLM-L6-v2`, PostgreSQL 16 + pgvector, Next.js App Router, Docker Compose.
+**Tech stack:** Python 3.12, FastAPI, FastMCP, SQLAlchemy 2.x, Alembic, LlamaIndex ingest writer, required Pydantic AI extractor, sentence-transformers `all-MiniLM-L6-v2`, PostgreSQL 16 + pgvector, Next.js App Router, Docker Compose.
 
 **Companion spec:** `docs/technical-spec.md`. `product-spec.md` wins on product behavior.
 
-**Confirmed:** optional Ollama + heuristic fallback; Next.js UI; no auth.
+**Confirmed:** required Ollama (or other OpenAI-compatible `/v1`) for extract; no regex fallback; Next.js UI; no auth. Historical slices below still mention the old optional-heuristic fork.
 
 ## Slices (do these in order)
 

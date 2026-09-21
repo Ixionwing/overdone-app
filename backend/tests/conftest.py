@@ -11,9 +11,12 @@ from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import text
 
+from fakes.extract_client import ScriptedExtractClient
+from overdone.api.deps import set_extract_client
 from overdone.config import Settings
 from overdone.db import create_engine, create_session_factory
 from overdone.ingest.catalog import seed_catalog
@@ -174,6 +177,12 @@ def client(postgres_url: str) -> Iterator[TestClient]:
         await engine.dispose()
 
     asyncio.run(seed())
-    settings = Settings(database_url=postgres_url, ollama_base_url=None)
+    settings = Settings(
+        database_url=postgres_url,
+        ollama_base_url="http://127.0.0.1:9/v1",
+    )
     with TestClient(create_app(settings)) as test_client:
+        app = test_client.app
+        assert isinstance(app, FastAPI)
+        set_extract_client(app, ScriptedExtractClient())
         yield test_client

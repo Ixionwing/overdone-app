@@ -16,7 +16,7 @@ from overdone.schemas.dto import (
     WarningFlag,
 )
 from overdone.services.bind import bind_name, load_enrichment, with_citation
-from overdone.services.extract import extract_prompt
+from overdone.services.extract import ExtractError, extract_prompt
 from overdone.services.history import (
     baseline_names,
     inherit_unit,
@@ -38,6 +38,30 @@ _MISSING_EXERCISE = (
     "No history for {name}. Enter a 1RM or working weight before rendering a verdict."
 )
 _AMBIGUOUS_UNITS = "Say whether the load is lb or kg before rendering a verdict."
+_EXTRACT_FAILED = "Could not extract a proposed change from the prompt."
+
+
+def resolve_macro_target_kg(
+    extracted: ExtractedPrompt, last_weight_kg: float
+) -> float | None:
+    if extracted.target_weight_kg is not None:
+        return extracted.target_weight_kg
+    for item in extracted.items:
+        if item.delta_kg is not None:
+            return last_weight_kg + item.delta_kg
+    return None
+
+
+def macro_sets_reps(extracted: ExtractedPrompt, last: LogSet) -> tuple[int, int]:
+    item = extracted.items[0] if extracted.items else None
+    sets = last.sets
+    reps = last.reps
+    if item is not None:
+        if item.sets is not None:
+            sets = item.sets
+        if item.reps is not None:
+            reps = item.reps
+    return sets, reps
 
 
 def _halt(
@@ -91,10 +115,14 @@ async def _retrieve_support(
 async def evaluate_prompt(
     session: AsyncSession, prompt: str, *, llm_client: object | None = None
 ) -> EvaluationResult:
-    extracted = await extract_prompt(prompt, llm_client=llm_client)
     sessions, benchmarks, preferred = await load_history(session)
     if not sessions and not benchmarks:
         return _halt(HaltReason.missing_baseline, _MISSING_BASELINE)
+
+    try:
+        extracted = await extract_prompt(prompt, llm_client=llm_client)
+    except ExtractError:
+        return _halt(HaltReason.extract_failed, _EXTRACT_FAILED)
 
     stored = stored_units(sessions, benchmarks)
     if extracted.unit is None and len(stored) > 1:
@@ -122,13 +150,14 @@ async def evaluate_prompt(
                 exercise_name=history,
             )
         weeks = extracted.weeks or 4
-        target = extracted.target_weight_kg
+        target = resolve_macro_target_kg(extracted, last.weight_kg)
         if target is None:
             return _halt(
                 HaltReason.missing_exercise,
                 "Macro goal is missing a target weight.",
                 exercise_name=history,
             )
+        sets, reps = macro_sets_reps(extracted, last)
         enrich = await load_enrichment(session, catalog_id)
         verdict = score_macro(
             current_kg=last.weight_kg,
@@ -137,12 +166,14 @@ async def evaluate_prompt(
             weekly_velocity_kg=weekly_velocity({history, raw_name}, sessions),
             working=last,
             enrichment=enrich,
+            target_sets=sets,
+            target_reps=reps,
         )
         verdict = verdict.model_copy(
             update={
                 "exercise_id": catalog_id or history,
                 "exercise_name": last.exercise_name,
-                "narrative": macro_narrative(verdict, weeks),
+                "narrative": macro_narrative(verdict, weeks, sets=sets, reps=reps),
             }
         )
         extra, citations = await _retrieve_support(
@@ -154,14 +185,8 @@ async def evaluate_prompt(
             overall_light=verdict.light,
             items=[verdict],
             session_factors=verdict.factors,
-            narrative=macro_narrative(verdict, weeks),
+            narrative=macro_narrative(verdict, weeks, sets=sets, reps=reps),
             warnings=flags,
-        )
-
-    if not extracted.items:
-        return _halt(
-            HaltReason.missing_exercise,
-            "Could not extract a proposed change from the prompt.",
         )
 
     resolved_items: list[ProposedItem] = []

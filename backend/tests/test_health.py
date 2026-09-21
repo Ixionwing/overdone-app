@@ -13,7 +13,7 @@ def test_health_ok(client: TestClient):
 def test_health_returns_503_when_database_unreachable():
     settings = Settings(
         database_url="postgresql+asyncpg://overdone:overdone@127.0.0.1:1/overdone",
-        ollama_base_url=None,
+        ollama_base_url="http://127.0.0.1:9/v1",
     )
     with TestClient(create_app(settings)) as test_client:
         response = test_client.get("/health")

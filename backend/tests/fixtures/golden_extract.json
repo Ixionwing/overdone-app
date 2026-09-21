@@ -1,0 +1,1852 @@
+[
+  {
+    "id": "rel-01",
+    "prompt": "add 20 lb to bench tomorrow",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "bench",
+          "amount": 20,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ]
+    },
+    "fewshot": true
+  },
+  {
+    "id": "abs-01",
+    "prompt": "bring pushdown up to 40 lb",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "pushdown",
+          "amount": 40,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        }
+      ]
+    },
+    "fewshot": true
+  },
+  {
+    "id": "rx-01",
+    "prompt": "3 sets of 8 @ 40lb on tricep pushdowns",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "tricep pushdowns",
+          "amount": 40,
+          "amount_kind": "absolute",
+          "amount_unit": "lb",
+          "sets": 3,
+          "reps": 8
+        }
+      ]
+    },
+    "fewshot": true
+  },
+  {
+    "id": "macro-01",
+    "prompt": "i want to bench 225 by next month",
+    "draft": {
+      "kind": "macro_goal",
+      "weeks": 4,
+      "items": [
+        {
+          "name": "bench",
+          "amount": 225,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        }
+      ]
+    },
+    "fewshot": true
+  },
+  {
+    "id": "multi-01",
+    "prompt": "+10 bench, +5 incline, +3 sets pushdowns tomorrow",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "bench",
+          "amount": 10,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        },
+        {
+          "name": "incline",
+          "amount": 5,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        },
+        {
+          "name": "pushdowns",
+          "amount": 3,
+          "amount_kind": "extra_sets"
+        }
+      ]
+    },
+    "fewshot": true
+  },
+  {
+    "id": "nick-01",
+    "prompt": "bring OHP to 135 tomorrow",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "OHP",
+          "amount": 135,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        }
+      ]
+    },
+    "fewshot": true
+  },
+  {
+    "id": "fatigue-01",
+    "prompt": "only slept 4 hours and feel beat up, but I want to add 10 lbs to bench tomorrow",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "bench",
+          "amount": 10,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ],
+      "declared_fatigue": "only slept 4 hours and feel beat up"
+    },
+    "fewshot": true
+  },
+  {
+    "id": "sub-01",
+    "prompt": "i want to add 30 lbs to my bench press tomorrow, or tell me what to do instead",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "bench press",
+          "amount": 30,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ],
+      "asks_substitution": true
+    },
+    "fewshot": true
+  },
+  {
+    "id": "nounit-01",
+    "prompt": "add 20 to bench tomorrow",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "bench",
+          "amount": 20,
+          "amount_kind": "delta"
+        }
+      ]
+    },
+    "fewshot": true
+  },
+  {
+    "id": "macro-delta-01",
+    "prompt": "add 30 lbs to my deadlift in 6 weeks",
+    "draft": {
+      "kind": "macro_goal",
+      "weeks": 6,
+      "items": [
+        {
+          "name": "deadlift",
+          "amount": 30,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ]
+    },
+    "fewshot": true
+  },
+  {
+    "id": "rel-squat-15",
+    "prompt": "bumping my squat up by 15 pounds next leg day",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "squat",
+          "amount": 15,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "rel-kg",
+    "prompt": "throw an extra 5kg on overhead press",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "overhead press",
+          "amount": 5,
+          "amount_kind": "delta",
+          "amount_unit": "kg"
+        }
+      ]
+    }
+  },
+  {
+    "id": "rel-sets",
+    "prompt": "i want to add 2 sets of pullups to my back workout friday",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "pullups",
+          "amount": 2,
+          "amount_kind": "extra_sets"
+        }
+      ]
+    }
+  },
+  {
+    "id": "rel-incline-db",
+    "prompt": "gonna try adding 10lbs on incline db bench",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "incline db bench",
+          "amount": 10,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "rel-drop",
+    "prompt": "drop 10 lbs off deadlift tomorrow",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "deadlift",
+          "amount": -10,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "rel-dips",
+    "prompt": "tack on 5 lbs to weighted dips for my next chest session",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "weighted dips",
+          "amount": 5,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "rel-laterals-kg",
+    "prompt": "increase lateral raises by 2.5kg next push workout",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "lateral raises",
+          "amount": 2.5,
+          "amount_kind": "delta",
+          "amount_unit": "kg"
+        }
+      ]
+    }
+  },
+  {
+    "id": "rel-calf-set",
+    "prompt": "add 1 set of calf raises at the end of leg day",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "calf raises",
+          "amount": 1,
+          "amount_kind": "extra_sets"
+        }
+      ]
+    }
+  },
+  {
+    "id": "rel-leg-press",
+    "prompt": "wanna add 25 pounds to my leg press on tuesday",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "leg press",
+          "amount": 25,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "rel-db-shoulder",
+    "prompt": "can i add 5 lbs to DB shoulder press today?",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "DB shoulder press",
+          "amount": 5,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "rel-rows-kg",
+    "prompt": "bumping up barbell rows by 10kg",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "barbell rows",
+          "amount": 10,
+          "amount_kind": "delta",
+          "amount_unit": "kg"
+        }
+      ]
+    }
+  },
+  {
+    "id": "abs-bench",
+    "prompt": "i want to bench 225 tomorrow",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "bench",
+          "amount": 225,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "abs-squat-315",
+    "prompt": "squatting 315 on my next lower body day",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "squat",
+          "amount": 315,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "abs-dl-kg",
+    "prompt": "taking deadlift to 180kg for friday's heavy pull session",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "deadlift",
+          "amount": 180,
+          "amount_kind": "absolute",
+          "amount_unit": "kg"
+        }
+      ]
+    }
+  },
+  {
+    "id": "abs-ohp-135",
+    "prompt": "want my overhead press at 135 lbs today",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "overhead press",
+          "amount": 135,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "abs-leg-ext",
+    "prompt": "set leg extension stack to 150 lbs for 3 sets",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "leg extension",
+          "amount": 150,
+          "amount_kind": "absolute",
+          "amount_unit": "lb",
+          "sets": 3
+        }
+      ]
+    }
+  },
+  {
+    "id": "abs-db-80",
+    "prompt": "gonna work up to 80lb dumbbells on chest press",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "chest press",
+          "amount": 80,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "abs-cable-rows",
+    "prompt": "bring cable rows to 60kg next time",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "cable rows",
+          "amount": 60,
+          "amount_kind": "absolute",
+          "amount_unit": "kg"
+        }
+      ]
+    }
+  },
+  {
+    "id": "abs-hip-thrust",
+    "prompt": "hit 100 lbs on hip thrusts tomorrow",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "hip thrusts",
+          "amount": 100,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "abs-curl-kg",
+    "prompt": "aiming for 50kg barbell curl on arms day",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "barbell curl",
+          "amount": 50,
+          "amount_kind": "absolute",
+          "amount_unit": "kg"
+        }
+      ]
+    }
+  },
+  {
+    "id": "abs-pulldown",
+    "prompt": "moving my lat pulldown to 140 lbs next workout",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "lat pulldown",
+          "amount": 140,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "abs-db-90",
+    "prompt": "target 90 lb DBs on flat bench next week",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "flat bench",
+          "amount": 90,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "rx-4x5",
+    "prompt": "do 4x5 @ 275lbs squat tomorrow",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "squat",
+          "amount": 275,
+          "amount_kind": "absolute",
+          "amount_unit": "lb",
+          "sets": 4,
+          "reps": 5
+        }
+      ]
+    }
+  },
+  {
+    "id": "rx-5x5-kg",
+    "prompt": "5x5 bench press at 100kg next monday",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "bench press",
+          "amount": 100,
+          "amount_kind": "absolute",
+          "amount_unit": "kg",
+          "sets": 5,
+          "reps": 5
+        }
+      ]
+    }
+  },
+  {
+    "id": "rx-3x10-lp",
+    "prompt": "3x10 leg press 400 lbs on leg day",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "leg press",
+          "amount": 400,
+          "amount_kind": "absolute",
+          "amount_unit": "lb",
+          "sets": 3,
+          "reps": 10
+        }
+      ]
+    }
+  },
+  {
+    "id": "rx-1x3-dl",
+    "prompt": "want to hit 1 set of 3 @ 405lb deadlift RPE 9",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "deadlift",
+          "amount": 405,
+          "amount_kind": "absolute",
+          "amount_unit": "lb",
+          "sets": 1,
+          "reps": 3
+        }
+      ]
+    }
+  },
+  {
+    "id": "rx-flyes",
+    "prompt": "4 sets of 12 reps with 35lb dumbbells for incline flyes",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "incline flyes",
+          "amount": 35,
+          "amount_kind": "absolute",
+          "amount_unit": "lb",
+          "sets": 4,
+          "reps": 12
+        }
+      ]
+    }
+  },
+  {
+    "id": "rx-pulldown-kg",
+    "prompt": "3x15 @ 50kg lat pulldown today",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "lat pulldown",
+          "amount": 50,
+          "amount_kind": "absolute",
+          "amount_unit": "kg",
+          "sets": 3,
+          "reps": 15
+        }
+      ]
+    }
+  },
+  {
+    "id": "rx-ohp-5x3",
+    "prompt": "doing 5x3 at 145 lbs overhead press friday",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "overhead press",
+          "amount": 145,
+          "amount_kind": "absolute",
+          "amount_unit": "lb",
+          "sets": 5,
+          "reps": 3
+        }
+      ]
+    }
+  },
+  {
+    "id": "rx-db-bench-amrap-ignored",
+    "prompt": "2x8 @ 90lb db bench press then 1xAMRAP",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "db bench press",
+          "amount": 90,
+          "amount_kind": "absolute",
+          "amount_unit": "lb",
+          "sets": 2,
+          "reps": 8
+        }
+      ]
+    }
+  },
+  {
+    "id": "rx-cable-row",
+    "prompt": "3 sets 10 reps seated cable row at 120 pounds",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "seated cable row",
+          "amount": 120,
+          "amount_kind": "absolute",
+          "amount_unit": "lb",
+          "sets": 3,
+          "reps": 10
+        }
+      ]
+    }
+  },
+  {
+    "id": "rx-bss",
+    "prompt": "4x8 Bulgarian split squats @ 40lb dumbbells",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "Bulgarian split squats",
+          "amount": 40,
+          "amount_kind": "absolute",
+          "amount_unit": "lb",
+          "sets": 4,
+          "reps": 8
+        }
+      ]
+    }
+  },
+  {
+    "id": "rx-hamstring",
+    "prompt": "3x12 hamstring curls @ 110lbs on lower day",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "hamstring curls",
+          "amount": 110,
+          "amount_kind": "absolute",
+          "amount_unit": "lb",
+          "sets": 3,
+          "reps": 12
+        }
+      ]
+    }
+  },
+  {
+    "id": "macro-8w",
+    "prompt": "reach a 405 squat over the next 8 weeks",
+    "draft": {
+      "kind": "macro_goal",
+      "weeks": 8,
+      "items": [
+        {
+          "name": "squat",
+          "amount": 405,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "macro-100kg-bench",
+    "prompt": "hit 100kg bench press within 6 weeks",
+    "draft": {
+      "kind": "macro_goal",
+      "weeks": 6,
+      "items": [
+        {
+          "name": "bench press",
+          "amount": 100,
+          "amount_kind": "absolute",
+          "amount_unit": "kg"
+        }
+      ]
+    }
+  },
+  {
+    "id": "macro-30-days",
+    "prompt": "get my squat from 275 to 315 in 30 days",
+    "draft": {
+      "kind": "macro_goal",
+      "weeks": 4,
+      "items": [
+        {
+          "name": "squat",
+          "amount": 315,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "macro-2-months-dips",
+    "prompt": "build up to 4 sets of 10 dips with +45lbs over 2 months",
+    "draft": {
+      "kind": "macro_goal",
+      "weeks": 8,
+      "items": [
+        {
+          "name": "dips",
+          "amount": 45,
+          "amount_kind": "absolute",
+          "amount_unit": "lb",
+          "sets": 4,
+          "reps": 10
+        }
+      ]
+    }
+  },
+  {
+    "id": "macro-row-delta",
+    "prompt": "gain 15lbs on my barbell row baseline over the next 4 weeks",
+    "draft": {
+      "kind": "macro_goal",
+      "weeks": 4,
+      "items": [
+        {
+          "name": "barbell row",
+          "amount": 15,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "multi-squat-rdl",
+    "prompt": "add 15 lbs to squat, 10 lbs to RDL, and 2 sets of leg curls",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "squat",
+          "amount": 15,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        },
+        {
+          "name": "RDL",
+          "amount": 10,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        },
+        {
+          "name": "leg curls",
+          "amount": 2,
+          "amount_kind": "extra_sets"
+        }
+      ]
+    }
+  },
+  {
+    "id": "multi-prescriptions",
+    "prompt": "tomorrow: 225x5 bench, 80x8 db incline, and 50lb cable flyes",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "bench",
+          "amount": 225,
+          "amount_kind": "absolute",
+          "amount_unit": "lb",
+          "reps": 5
+        },
+        {
+          "name": "db incline",
+          "amount": 80,
+          "amount_kind": "absolute",
+          "amount_unit": "lb",
+          "reps": 8
+        },
+        {
+          "name": "cable flyes",
+          "amount": 50,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "multi-dl-ohp",
+    "prompt": "bumping up deadlift by 20 lbs and overhead press by 5 lbs on friday",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "deadlift",
+          "amount": 20,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        },
+        {
+          "name": "overhead press",
+          "amount": 5,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "multi-mixed-units",
+    "prompt": "add 1 set to pullups, +5kg on barbell row, and +10lbs on lat pulldown",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "pullups",
+          "amount": 1,
+          "amount_kind": "extra_sets"
+        },
+        {
+          "name": "barbell row",
+          "amount": 5,
+          "amount_kind": "delta",
+          "amount_unit": "kg"
+        },
+        {
+          "name": "lat pulldown",
+          "amount": 10,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "multi-leg-press-calf",
+    "prompt": "increase leg press to 450, add 10 lbs to calf raises, +1 set leg extensions",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "leg press",
+          "amount": 450,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        },
+        {
+          "name": "calf raises",
+          "amount": 10,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        },
+        {
+          "name": "leg extensions",
+          "amount": 1,
+          "amount_kind": "extra_sets"
+        }
+      ]
+    }
+  },
+  {
+    "id": "multi-arms",
+    "prompt": "+5 lbs db curls, +10 lbs hammer curls, +2 sets tricep extensions for arms",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "db curls",
+          "amount": 5,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        },
+        {
+          "name": "hammer curls",
+          "amount": 10,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        },
+        {
+          "name": "tricep extensions",
+          "amount": 2,
+          "amount_kind": "extra_sets"
+        }
+      ]
+    }
+  },
+  {
+    "id": "multi-powerlifting",
+    "prompt": "wanna do 315 squat, 225 bench, and 405 deadlift in one session",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "squat",
+          "amount": 315,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        },
+        {
+          "name": "bench",
+          "amount": 225,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        },
+        {
+          "name": "deadlift",
+          "amount": 405,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "multi-signed",
+    "prompt": "add 10lb to overhead press and subtract 5lb from lateral raises",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "overhead press",
+          "amount": 10,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        },
+        {
+          "name": "lateral raises",
+          "amount": -5,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "multi-bench-dips",
+    "prompt": "bumping bench press by 5kg and adding 2 sets of dips tomorrow",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "bench press",
+          "amount": 5,
+          "amount_kind": "delta",
+          "amount_unit": "kg"
+        },
+        {
+          "name": "dips",
+          "amount": 2,
+          "amount_kind": "extra_sets"
+        }
+      ]
+    }
+  },
+  {
+    "id": "multi-front-squat",
+    "prompt": "+10 lbs on front squat, +15 lbs on hip thrust, and 1 extra set of split squats",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "front squat",
+          "amount": 10,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        },
+        {
+          "name": "hip thrust",
+          "amount": 15,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        },
+        {
+          "name": "split squats",
+          "amount": 1,
+          "amount_kind": "extra_sets"
+        }
+      ]
+    }
+  },
+  {
+    "id": "multi-back",
+    "prompt": "take lat pulldown to 150lb, facepulls to 60lb, and add 2 sets of shrugs",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "lat pulldown",
+          "amount": 150,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        },
+        {
+          "name": "facepulls",
+          "amount": 60,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        },
+        {
+          "name": "shrugs",
+          "amount": 2,
+          "amount_kind": "extra_sets"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nick-db",
+    "prompt": "add 10 lbs to DB bench",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "DB bench",
+          "amount": 10,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nick-rdl",
+    "prompt": "add 20 lbs on RDLs for leg day",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "RDLs",
+          "amount": 20,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nick-bb-row",
+    "prompt": "+15 lbs to BB row",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "BB row",
+          "amount": 15,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nick-rear-delts",
+    "prompt": "3 sets of 10 on rear delts",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "rear delts",
+          "sets": 3,
+          "reps": 10
+        }
+      ]
+    }
+  },
+  {
+    "id": "nick-conventional",
+    "prompt": "add 10kg on conventional",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "conventional",
+          "amount": 10,
+          "amount_kind": "delta",
+          "amount_unit": "kg"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nick-skullcrushers",
+    "prompt": "take skullcrushers up to 70 lbs",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "skullcrushers",
+          "amount": 70,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nick-preacher",
+    "prompt": "do 4 sets of 12 on preacher curls",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "preacher curls",
+          "sets": 4,
+          "reps": 12
+        }
+      ]
+    }
+  },
+  {
+    "id": "nick-sissy",
+    "prompt": "bump up sissy squats by 10 lbs",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "sissy squats",
+          "amount": 10,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nick-incline-dbs",
+    "prompt": "+5 lbs on incline DBs",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "incline DBs",
+          "amount": 5,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nick-hammy",
+    "prompt": "add 2 sets to hammy curls",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "hammy curls",
+          "amount": 2,
+          "amount_kind": "extra_sets"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nick-incline-bb",
+    "prompt": "bring incline barbell up to 185",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "incline barbell",
+          "amount": 185,
+          "amount_kind": "absolute"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nick-pec-deck",
+    "prompt": "add 10 lbs on pec deck tomorrow",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "pec deck",
+          "amount": 10,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "fatigue-sore",
+    "prompt": "feeling super sore from tuesday, but wanna try adding 5kg to squat today",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "squat",
+          "amount": 5,
+          "amount_kind": "delta",
+          "amount_unit": "kg"
+        }
+      ],
+      "declared_fatigue": "feeling super sore from tuesday"
+    }
+  },
+  {
+    "id": "fatigue-work",
+    "prompt": "exhausted from work and low energy, aiming for 225 bench anyway",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "bench",
+          "amount": 225,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        }
+      ],
+      "declared_fatigue": "exhausted from work and low energy"
+    }
+  },
+  {
+    "id": "fatigue-sleep",
+    "prompt": "slept terrible last night, can i still add 15 lbs to deadlift?",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "deadlift",
+          "amount": 15,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ],
+      "declared_fatigue": "slept terrible last night"
+    }
+  },
+  {
+    "id": "fatigue-back",
+    "prompt": "lower back is stiff today, wanting to do 315 squat",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "squat",
+          "amount": 315,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        }
+      ],
+      "declared_fatigue": "lower back is stiff today"
+    }
+  },
+  {
+    "id": "fatigue-weather",
+    "prompt": "feeling under the weather, adding 5lbs to overhead press",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "overhead press",
+          "amount": 5,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ],
+      "declared_fatigue": "feeling under the weather"
+    }
+  },
+  {
+    "id": "fatigue-shoulder",
+    "prompt": "shoulder feels a bit twingey, but wanna bump incline db bench to 70s",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "incline db bench",
+          "amount": 70,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        }
+      ],
+      "declared_fatigue": "shoulder feels a bit twingey"
+    }
+  },
+  {
+    "id": "fatigue-cns",
+    "prompt": "drained from CNS fatigue from yesterday's heavy pull, adding 2 sets of squats tomorrow",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "squats",
+          "amount": 2,
+          "amount_kind": "extra_sets"
+        }
+      ],
+      "declared_fatigue": "drained from CNS fatigue from yesterday's heavy pull"
+    }
+  },
+  {
+    "id": "fatigue-fasted",
+    "prompt": "fasted today and energy is low, bring pushdowns up to 50 lbs",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "pushdowns",
+          "amount": 50,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        }
+      ],
+      "declared_fatigue": "fasted today and energy is low"
+    }
+  },
+  {
+    "id": "fatigue-3h",
+    "prompt": "working on 3 hours of sleep, add 20 lbs to leg press",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "leg press",
+          "amount": 20,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ],
+      "declared_fatigue": "working on 3 hours of sleep"
+    }
+  },
+  {
+    "id": "fatigue-elbow",
+    "prompt": "elbow aching slightly, wanna add 5 lbs to barbell curl",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "barbell curl",
+          "amount": 5,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ],
+      "declared_fatigue": "elbow aching slightly"
+    }
+  },
+  {
+    "id": "fatigue-knee",
+    "prompt": "knee feels cranky, but planning 4x8 @ 245lb squat",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "squat",
+          "amount": 245,
+          "amount_kind": "absolute",
+          "amount_unit": "lb",
+          "sets": 4,
+          "reps": 8
+        }
+      ],
+      "declared_fatigue": "knee feels cranky"
+    }
+  },
+  {
+    "id": "sub-ohp",
+    "prompt": "add 20 lbs to overhead press, but if that's overdoing it what exercise should i swap to?",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "overhead press",
+          "amount": 20,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ],
+      "asks_substitution": true
+    }
+  },
+  {
+    "id": "sub-squat",
+    "prompt": "bring squat to 365, or give me a safer alternative lower body move",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "squat",
+          "amount": 365,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        }
+      ],
+      "asks_substitution": true
+    }
+  },
+  {
+    "id": "sub-rows",
+    "prompt": "+15 lbs on barbell rows tomorrow, or suggest a safer back exercise if too high",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "barbell rows",
+          "amount": 15,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ],
+      "asks_substitution": true
+    }
+  },
+  {
+    "id": "sub-dips",
+    "prompt": "add 3 extra heavy sets of dips, or tell me a better chest finisher",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "dips",
+          "amount": 3,
+          "amount_kind": "extra_sets"
+        }
+      ],
+      "asks_substitution": true
+    }
+  },
+  {
+    "id": "sub-dl",
+    "prompt": "jump deadlift by 40 lbs friday, or what should i do instead?",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "deadlift",
+          "amount": 40,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ],
+      "asks_substitution": true
+    }
+  },
+  {
+    "id": "sub-incline-kg",
+    "prompt": "add 10kg to incline db press, or offer a safer substitute",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "incline db press",
+          "amount": 10,
+          "amount_kind": "delta",
+          "amount_unit": "kg"
+        }
+      ],
+      "asks_substitution": true
+    }
+  },
+  {
+    "id": "sub-leg-press",
+    "prompt": "take leg press to 500 lbs tomorrow, or advise a safer set/rep scheme",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "leg press",
+          "amount": 500,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        }
+      ],
+      "asks_substitution": true
+    }
+  },
+  {
+    "id": "sub-skull",
+    "prompt": "+10 lbs on skullcrushers, or suggest another tricep exercise if my elbows will complain",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "skullcrushers",
+          "amount": 10,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ],
+      "asks_substitution": true
+    }
+  },
+  {
+    "id": "sub-bench-week",
+    "prompt": "aiming for 225 bench press next week, or recommend a better progression plan",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "bench press",
+          "amount": 225,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        }
+      ],
+      "asks_substitution": true
+    }
+  },
+  {
+    "id": "sub-rdl",
+    "prompt": "add 25 lbs on RDLs tomorrow or recommend a safer posterior chain exercise",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "RDLs",
+          "amount": 25,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ],
+      "asks_substitution": true
+    }
+  },
+  {
+    "id": "sub-shoulder-db",
+    "prompt": "bring shoulder press to 80lb DBs or tell me what to swap it with",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "shoulder press",
+          "amount": 80,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        }
+      ],
+      "asks_substitution": true
+    }
+  },
+  {
+    "id": "nounit-pushdown",
+    "prompt": "bring pushdown up to 40",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "pushdown",
+          "amount": 40,
+          "amount_kind": "absolute"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nounit-squat",
+    "prompt": "take squat to 315 next leg day",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "squat",
+          "amount": 315,
+          "amount_kind": "absolute"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nounit-ohp-delta",
+    "prompt": "bumping overhead press by 10 on friday",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "overhead press",
+          "amount": 10,
+          "amount_kind": "delta"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nounit-bench-reps",
+    "prompt": "want to hit 225 for 5 reps on bench",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "bench",
+          "amount": 225,
+          "amount_kind": "absolute",
+          "reps": 5
+        }
+      ]
+    }
+  },
+  {
+    "id": "nounit-laterals",
+    "prompt": "add 5 to lateral raises",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "lateral raises",
+          "amount": 5,
+          "amount_kind": "delta"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nounit-dl",
+    "prompt": "take deadlift to 405 next week",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "deadlift",
+          "amount": 405,
+          "amount_kind": "absolute"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nounit-rows",
+    "prompt": "bumping barbell rows up by 15",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "barbell rows",
+          "amount": 15,
+          "amount_kind": "delta"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nounit-rx",
+    "prompt": "3 sets of 8 @ 50 on cable rows",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "cable rows",
+          "amount": 50,
+          "amount_kind": "absolute",
+          "sets": 3,
+          "reps": 8
+        }
+      ]
+    }
+  },
+  {
+    "id": "nounit-lp",
+    "prompt": "add 25 to leg press on tuesday",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "leg press",
+          "amount": 25,
+          "amount_kind": "delta"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nounit-db-80s",
+    "prompt": "bring db bench up to 80s",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "db bench",
+          "amount": 80,
+          "amount_kind": "absolute"
+        }
+      ]
+    }
+  },
+  {
+    "id": "nounit-pulldown",
+    "prompt": "increase lat pulldown by 10 tomorrow",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "lat pulldown",
+          "amount": 10,
+          "amount_kind": "delta"
+        }
+      ]
+    }
+  },
+  {
+    "id": "edge-dense-multi",
+    "prompt": "add 10lbs to DB incline bench press, 5lbs on lateral raises and do 3 sets of 12 pushdowns @ 40lbs",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "DB incline bench press",
+          "amount": 10,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        },
+        {
+          "name": "lateral raises",
+          "amount": 5,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        },
+        {
+          "name": "pushdowns",
+          "amount": 40,
+          "amount_kind": "absolute",
+          "amount_unit": "lb",
+          "sets": 3,
+          "reps": 12
+        }
+      ]
+    }
+  },
+  {
+    "id": "edge-question",
+    "prompt": "can i add 15 lbs to my bench press or is that too much?",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "bench press",
+          "amount": 15,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "edge-runon",
+    "prompt": "im thinking of adding 10 lbs to my bench but my shoulder has been kinda iffy since last week",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "bench",
+          "amount": 10,
+          "amount_kind": "delta",
+          "amount_unit": "lb"
+        }
+      ],
+      "declared_fatigue": "shoulder has been kinda iffy since last week"
+    }
+  },
+  {
+    "id": "edge-jump-macro",
+    "prompt": "jump from 185 to 205 on incline barbell in 2 weeks",
+    "draft": {
+      "kind": "macro_goal",
+      "weeks": 2,
+      "items": [
+        {
+          "name": "incline barbell",
+          "amount": 205,
+          "amount_kind": "absolute",
+          "amount_unit": "lb"
+        }
+      ]
+    }
+  },
+  {
+    "id": "edge-mixed-lifts",
+    "prompt": "add 5kg to bench and do 4x10 @ 60kg squat next leg day",
+    "draft": {
+      "kind": "single_session",
+      "items": [
+        {
+          "name": "bench",
+          "amount": 5,
+          "amount_kind": "delta",
+          "amount_unit": "kg"
+        },
+        {
+          "name": "squat",
+          "amount": 60,
+          "amount_kind": "absolute",
+          "amount_unit": "kg",
+          "sets": 4,
+          "reps": 10
+        }
+      ]
+    }
+  },
+  {
+    "id": "get-to-macro",
+    "prompt": "I want to get to 3 sets of 8 @ 40lb on my cable pushdown over the next 4 weeks",
+    "draft": {
+      "kind": "macro_goal",
+      "weeks": 4,
+      "items": [
+        {
+          "name": "cable pushdown",
+          "amount": 40,
+          "amount_kind": "absolute",
+          "amount_unit": "lb",
+          "sets": 3,
+          "reps": 8
+        }
+      ]
+    }
+  }
+]

@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from overdone.api.deps import ExtractSlot
 from overdone.api.routers import baseline, evaluate, health
 from overdone.boot import bootstrap_database
 from overdone.config import Settings
@@ -18,7 +19,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     engine = create_engine(config.database_url)
     session_factory = create_session_factory(engine)
     extract_client = extract_client_from_settings(config)
-    mcp = create_mcp(session_factory, llm_client=extract_client)
+    if extract_client is None:
+        raise RuntimeError("OLLAMA_BASE_URL is required for prompt extraction")
+    extract_slot = ExtractSlot(extract_client)
+    mcp = create_mcp(session_factory, get_llm_client=lambda: extract_slot.client)
     mcp_http = mcp.http_app(path="/", transport="http")
 
     @asynccontextmanager
@@ -32,6 +36,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.settings = config
     app.state.engine = engine
     app.state.session_factory = session_factory
+    app.state.extract_slot = extract_slot
     app.state.extract_client = extract_client
     app.state.mcp = mcp
     app.add_middleware(
@@ -47,4 +52,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     return app
 
 
-app = create_app()
+if (default_settings.ollama_base_url or "").strip():
+    app = create_app()
+else:
+    app = FastAPI(title=default_settings.app_name)

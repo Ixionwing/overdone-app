@@ -121,5 +121,28 @@ def test_macro_225_in_4_weeks_with_zero_velocity_is_red():
     assert verdict.light is TrafficLight.red
 
 
+def test_macro_named_3x8_uses_prescription_volume_not_3x5():
+    working = LogSet(
+        exercise_id="pushdown",
+        exercise_name="Cable Pushdown",
+        weight_kg=lb_to_kg(30),
+        reps=10,
+        sets=3,
+    )
+    verdict = score_macro(
+        current_kg=working.weight_kg,
+        target_kg=lb_to_kg(35),
+        weeks=4,
+        weekly_velocity_kg=0.0,
+        working=working,
+        enrichment=DEFAULT_ENRICHMENT,
+        target_sets=3,
+        target_reps=8,
+    )
+    # 3x8@35 vs 3x10@30 → (840 - 900) / 900
+    assert verdict.factors.volume_jump_pct == -6.7
+    assert verdict.light is not TrafficLight.red
+
+
 def test_qualitative_notes_do_not_change_volume_jump():
     assert "notes" not in inspect.signature(score_session).parameters

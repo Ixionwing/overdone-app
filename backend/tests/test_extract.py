@@ -7,110 +7,11 @@ from pydantic import ValidationError
 from pydantic_ai import UnexpectedModelBehavior
 
 from overdone.config import Settings
+from overdone.main import create_app
 from overdone.schemas.dto import ExtractedPrompt, PromptKind, ProposedItem, Unit
-from overdone.services.extract import extract_prompt
+from overdone.schemas.extract_draft import ExtractDraft
+from overdone.services.extract import ExtractError, extract_prompt
 from overdone.services.extract_llm import extract_client_from_settings
-
-
-def _extract(text: str):
-    return asyncio.run(extract_prompt(text, llm_client=None))
-
-
-def test_sets_reps_and_weight_on_named_lift():
-    result = _extract("I want to make my cable pushdown 3 sets of 10 reps, 45lbs each")
-    assert result.kind is PromptKind.single_session
-    assert len(result.items) == 1
-    assert result.unit is Unit.lb
-    item = result.items[0]
-    assert "pushdown" in item.exercise_name.casefold()
-    assert item.sets == 3
-    assert item.reps == 10
-    assert item.weight_kg is not None
-    assert abs(item.weight_kg - 20.41165665) < 1e-6
-
-
-def test_weight_delta_also_reads_sets_and_reps():
-    result = _extract("Add 20 lbs to Bench tomorrow, 3 sets of 8")
-    assert len(result.items) == 1
-    assert result.items[0].sets == 3
-    assert result.items[0].reps == 8
-    assert result.items[0].delta_kg is not None
-    assert abs(result.items[0].delta_kg - 9.0718474) < 1e-6
-
-
-def test_empty_llm_extract_falls_back_to_heuristic():
-    class EmptyExtractor:
-        async def extract(self, text: str) -> ExtractedPrompt:
-            return ExtractedPrompt(
-                kind=PromptKind.single_session,
-                items=[],
-                raw_text=text,
-            )
-
-    result = asyncio.run(
-        extract_prompt(
-            "I want to make my cable pushdown 3 sets of 10 reps, 45lbs each",
-            llm_client=EmptyExtractor(),
-        )
-    )
-    assert len(result.items) == 1
-    assert "pushdown" in result.items[0].exercise_name.casefold()
-    assert result.items[0].sets == 3
-    assert result.items[0].reps == 10
-
-
-def test_add_20_lbs_to_db_bench():
-    result = _extract("Add 20 lbs to DB Bench Press tomorrow.")
-    assert result.kind is PromptKind.single_session
-    assert len(result.items) == 1
-    assert result.unit is Unit.lb
-    assert result.items[0].delta_kg is not None
-    assert abs(result.items[0].delta_kg - 9.0718474) < 1e-6
-    assert "bench" in result.items[0].exercise_name.casefold()
-
-
-def test_multi_movement_prompt():
-    result = _extract(
-        "Tomorrow: +10 lbs Bench, +5 lbs Incline DB Press, +3 sets Pushdowns."
-    )
-    assert result.kind is PromptKind.single_session
-    assert len(result.items) == 3
-    names = [item.exercise_name.casefold() for item in result.items]
-    assert any("bench" in name for name in names)
-    assert any("incline" in name for name in names)
-    assert any("pushdown" in name for name in names)
-    extras = [item.extra_sets for item in result.items if item.extra_sets]
-    assert extras == [3]
-
-
-def test_macro_225_squat_next_month():
-    result = _extract("Reach a 225 lb Squat by next month.")
-    assert result.kind is PromptKind.macro_goal
-    assert result.weeks == 4
-    assert result.unit is Unit.lb
-    assert result.target_exercise_name is not None
-    assert "squat" in result.target_exercise_name.casefold()
-    assert result.target_weight_kg is not None
-    assert abs(result.target_weight_kg - 102.05828325) < 1e-6
-
-
-def test_fatigue_clause_copied():
-    result = _extract("Slept 4 hours, but want to add 10 lbs to Bench tomorrow.")
-    assert result.declared_fatigue is not None
-    assert "slept 4 hours" in result.declared_fatigue.casefold()
-    assert len(result.items) == 1
-
-
-def test_substitution_flag():
-    result = _extract("Add 30 lbs to Bench tomorrow, or tell me what to do instead.")
-    assert result.asks_substitution is True
-    assert len(result.items) == 1
-
-
-def test_missing_unit_stays_none():
-    result = _extract("Add 200 to Bench tomorrow.")
-    assert result.unit is None
-    assert result.items[0].delta_kg == 200
 
 
 class _BrokenExtractor:
@@ -118,31 +19,9 @@ class _BrokenExtractor:
         raise RuntimeError("extractor bug")
 
 
-def test_unexpected_extractor_error_propagates():
-    with pytest.raises(RuntimeError, match="extractor bug"):
-        asyncio.run(
-            extract_prompt(
-                "Add 20 lbs to Bench tomorrow.",
-                llm_client=_BrokenExtractor(),
-            )
-        )
-
-
 class _TimeoutExtractor:
     async def extract(self, text: str):
         raise TimeoutError
-
-
-def test_timeout_falls_back_to_heuristic():
-    result = asyncio.run(
-        extract_prompt(
-            "Add 20 lbs to Bench tomorrow.",
-            llm_client=_TimeoutExtractor(),
-        )
-    )
-    assert len(result.items) == 1
-    assert result.items[0].delta_kg is not None
-    assert abs(result.items[0].delta_kg - 9.0718474) < 1e-6
 
 
 class _InvalidExtractor:
@@ -150,30 +29,9 @@ class _InvalidExtractor:
         raise ValidationError.from_exception_data("ExtractedPrompt", [])
 
 
-def test_invalid_structured_output_falls_back_to_heuristic():
-    result = asyncio.run(
-        extract_prompt(
-            "Add 20 lbs to Bench tomorrow.",
-            llm_client=_InvalidExtractor(),
-        )
-    )
-    assert len(result.items) == 1
-    assert "bench" in result.items[0].exercise_name.casefold()
-
-
 class _ModelErrorExtractor:
     async def extract(self, text: str):
         raise UnexpectedModelBehavior("not json")
-
-
-def test_model_behavior_error_falls_back_to_heuristic():
-    result = asyncio.run(
-        extract_prompt(
-            "Add 20 lbs to Bench tomorrow.",
-            llm_client=_ModelErrorExtractor(),
-        )
-    )
-    assert len(result.items) == 1
 
 
 class _FixedExtractor:
@@ -189,6 +47,95 @@ class _FixedExtractor:
             ],
             unit=Unit.lb,
             raw_text=text,
+        )
+
+
+def test_missing_client_raises_extract_error():
+    with pytest.raises(ExtractError):
+        asyncio.run(extract_prompt("add 20 lbs to bench", llm_client=None))
+
+
+def test_timeout_raises_extract_error():
+    with pytest.raises(ExtractError):
+        asyncio.run(
+            extract_prompt("add 20 lbs to bench", llm_client=_TimeoutExtractor())
+        )
+
+
+def test_empty_session_extract_raises_extract_error():
+    class EmptyExtractor:
+        async def extract(self, text: str) -> ExtractedPrompt:
+            return ExtractedPrompt(
+                kind=PromptKind.single_session, items=[], raw_text=text
+            )
+
+    with pytest.raises(ExtractError):
+        asyncio.run(
+            extract_prompt("get to 3 sets of 8 @ 40lb", llm_client=EmptyExtractor())
+        )
+
+
+def test_valid_macro_without_items_is_kept():
+    class MacroExtractor:
+        async def extract(self, text: str) -> ExtractedPrompt:
+            return ExtractedPrompt(
+                kind=PromptKind.macro_goal,
+                items=[],
+                weeks=4,
+                target_weight_kg=18.1436948,
+                target_exercise_name="cable pushdown",
+                unit=Unit.lb,
+                raw_text=text,
+            )
+
+    result = asyncio.run(
+        extract_prompt("over the next 4 weeks", llm_client=MacroExtractor())
+    )
+    assert result.kind is PromptKind.macro_goal
+    assert result.weeks == 4
+
+
+def test_macro_missing_target_raises_extract_error():
+    class IncompleteMacro:
+        async def extract(self, text: str) -> ExtractedPrompt:
+            return ExtractedPrompt(
+                kind=PromptKind.macro_goal,
+                items=[],
+                weeks=4,
+                raw_text=text,
+            )
+
+    with pytest.raises(ExtractError):
+        asyncio.run(extract_prompt("in a month", llm_client=IncompleteMacro()))
+
+
+def test_unexpected_extractor_error_propagates():
+    with pytest.raises(RuntimeError, match="extractor bug"):
+        asyncio.run(
+            extract_prompt(
+                "Add 20 lbs to Bench tomorrow.",
+                llm_client=_BrokenExtractor(),
+            )
+        )
+
+
+def test_invalid_structured_output_raises_extract_error():
+    with pytest.raises(ExtractError):
+        asyncio.run(
+            extract_prompt(
+                "Add 20 lbs to Bench tomorrow.",
+                llm_client=_InvalidExtractor(),
+            )
+        )
+
+
+def test_model_behavior_error_raises_extract_error():
+    with pytest.raises(ExtractError):
+        asyncio.run(
+            extract_prompt(
+                "Add 20 lbs to Bench tomorrow.",
+                llm_client=_ModelErrorExtractor(),
+            )
         )
 
 
@@ -210,3 +157,108 @@ def test_ollama_url_builds_extract_client():
     )
     assert client is not None
     assert callable(client.extract)
+
+
+def test_extract_client_uses_timeout_seconds():
+    client = extract_client_from_settings(
+        Settings(
+            ollama_base_url="http://127.0.0.1:9/v1",
+            ollama_timeout_seconds=30.0,
+        )
+    )
+    assert client is not None
+    assert client.timeout == 30.0
+
+
+def test_create_app_requires_ollama_url() -> None:
+    with pytest.raises(RuntimeError, match="OLLAMA_BASE_URL"):
+        create_app(
+            Settings(
+                database_url="postgresql+asyncpg://overdone@127.0.0.1:1/overdone",
+                ollama_base_url=None,
+            )
+        )
+
+
+def test_proposed_item_coerces_null_strings() -> None:
+    item = ProposedItem.model_validate(
+        {
+            "exercise_name": "bench press",
+            "reps": "null",
+            "sets": "null",
+            "extra_sets": "null",
+            "exercise_id": "null",
+        }
+    )
+    assert item.reps is None
+    assert item.sets is None
+    assert item.extra_sets is None
+    assert item.exercise_id is None
+
+
+def test_extract_prompt_maps_draft() -> None:
+    class DraftExtractor:
+        async def extract(self, text: str) -> ExtractDraft:
+            return ExtractDraft.model_validate(
+                {
+                    "kind": "single_session",
+                    "items": [
+                        {
+                            "name": "bench",
+                            "amount": 20,
+                            "amount_kind": "delta",
+                            "amount_unit": "lb",
+                        }
+                    ],
+                }
+            )
+
+    result = asyncio.run(
+        extract_prompt("add 20 lb to bench tomorrow", llm_client=DraftExtractor())
+    )
+    assert result.kind is PromptKind.single_session
+    assert result.unit is Unit.lb
+    assert result.items[0].exercise_name == "bench"
+    assert result.items[0].delta_kg is not None
+    assert result.raw_text == "add 20 lb to bench tomorrow"
+
+
+def test_extract_prompt_keeps_macro_delta_draft() -> None:
+    class DraftExtractor:
+        async def extract(self, text: str) -> ExtractDraft:
+            return ExtractDraft.model_validate(
+                {
+                    "kind": "macro_goal",
+                    "weeks": 6,
+                    "items": [
+                        {
+                            "name": "deadlift",
+                            "amount": 30,
+                            "amount_kind": "delta",
+                            "amount_unit": "lb",
+                        }
+                    ],
+                }
+            )
+
+    result = asyncio.run(
+        extract_prompt(
+            "add 30 lbs to my deadlift in 6 weeks", llm_client=DraftExtractor()
+        )
+    )
+    assert result.kind is PromptKind.macro_goal
+    assert result.weeks == 6
+    assert result.target_weight_kg is None
+    assert result.items[0].delta_kg is not None
+
+
+def test_extracted_prompt_drops_relative_target_date() -> None:
+    extracted = ExtractedPrompt.model_validate(
+        {
+            "kind": "single_session",
+            "items": [{"exercise_name": "Bench", "delta_kg": 9.07}],
+            "target_date": "tomorrow",
+        }
+    )
+    assert extracted.target_date is None
+    assert extracted.raw_text == ""

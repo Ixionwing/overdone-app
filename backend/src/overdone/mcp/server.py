@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from fastmcp import FastMCP
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -15,7 +17,7 @@ from overdone.services.evaluate import evaluate_prompt as run_evaluate
 def create_mcp(
     session_factory: async_sessionmaker[AsyncSession],
     *,
-    llm_client: object | None = None,
+    get_llm_client: Callable[[], object | None],
 ) -> FastMCP:
     mcp = FastMCP("Overdone")
 
@@ -41,7 +43,7 @@ def create_mcp(
     @mcp.tool
     async def evaluate_prompt(prompt: str) -> dict:
         async with session_factory() as session:
-            result = await run_evaluate(session, prompt, llm_client=llm_client)
+            result = await run_evaluate(session, prompt, llm_client=get_llm_client())
             return result.model_dump(mode="json")
 
     return mcp

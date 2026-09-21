@@ -26,6 +26,8 @@ services:
       DATA_DIR: /app/data
       BOOTSTRAP: "true"
       HF_HOME: /home/app/.cache/huggingface
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434/v1}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.2}
     depends_on:
       db:
         condition: service_healthy

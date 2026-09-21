@@ -100,6 +100,11 @@ def test_resolve_embedding_nickname(postgres_url: str) -> None:
     assert asyncio.run(run())
 
 
+def test_stub_matches_plural_cable_pushdowns() -> None:
+    names = ["Cable Pushdown"]
+    assert resolve_from_baseline("cable pushdowns", names) == "Cable Pushdown"
+
+
 def test_stub_misses_medium_grip_nickname() -> None:
     names = ["Barbell Bench Press - Medium Grip"]
     assert resolve_from_baseline("medium grip barbell bench", names) is None

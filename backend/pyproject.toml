@@ -55,6 +55,7 @@ select = ["E", "F", "I", "UP"]
 
 [tool.ruff.lint.per-file-ignores]
 "alembic/versions/*.py" = ["E501"]
+"tests/fixtures/_gen_golden_extract.py" = ["E501"]
 
 [tool.ruff.format]
 quote-style = "double"
