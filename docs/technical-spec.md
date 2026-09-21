@@ -1,6 +1,6 @@
 # Overdone — Technical Specification (POC)
 
-This document turns `product-spec.md` into implementable contracts: services, schemas, formulas, APIs, and test seams. Product behavior in `product-spec.md` wins when this file and the product spec disagree. Numbers below are **POC defaults** so scoring is deterministic and testable; they are not clinical guidance.
+This document turns `docs/product-spec.md` into implementable contracts: services, schemas, formulas, APIs, and test seams. Product behavior in `docs/product-spec.md` wins when this file and the product spec disagree. Numbers below are **POC defaults** so scoring is deterministic and testable; they are not clinical guidance.
 
 ## 1. Decisions (confirmed 2026-09-20)
 
@@ -64,7 +64,6 @@ One API process. FastMCP is mounted on FastAPI (stdio is not the default compose
 
 ```
 overdone-app/
-  product-spec.md
   docs/technical-spec.md
   docs/implementation-plan.md
   compose.yaml
@@ -81,8 +80,11 @@ overdone-app/
       api/routers/baseline.py
       api/routers/evaluate.py
       models/                 # SQLAlchemy
-      schemas/                # Pydantic API + domain DTOs
-      services/extract.py
+      schemas/                # Pydantic API + domain DTOs, extract_draft
+      services/extract.py     # fail-closed; maps ExtractDraft → ExtractedPrompt
+      services/extract_llm.py
+      services/extract_map.py
+      services/extract_gold.py
       services/baseline.py
       services/scoring.py
       services/narrative.py
@@ -91,6 +93,7 @@ overdone-app/
       ingest/catalog.py       # LlamaIndex seed
       mcp/server.py
     tests/
+    scripts/eval_extract_live.py  # optional; OVERDONE_LIVE_EXTRACT=1
   frontend/
     Dockerfile
     package.json
@@ -101,6 +104,11 @@ overdone-app/
     free-exercise-db/         # vendored or downloaded dist/exercises.json
     enrichment_rules.json     # axial / CNS / joint overlays
     sample_baseline.json
+  docs/
+    product-spec.md
+    golden-extract-dataset.md
+    technical-spec.md
+    implementation-plan.md
 ```
 
 Python lives in `backend/` (`overdone` package). UI lives in `frontend/`. No second ORM. No Prisma.
@@ -120,6 +128,7 @@ Canonical mass unit in storage and math: **kilograms**. Display may use `lb` or 
 ```python
 from datetime import date
 from enum import Enum
+from typing import Literal
 from pydantic import BaseModel, Field
 
 
@@ -182,6 +191,24 @@ class ProposedItem(BaseModel):
     extra_sets: int | None = None
 
 
+class DraftItem(BaseModel):
+    name: str
+    amount: float | None = None
+    amount_kind: Literal["delta", "absolute", "extra_sets"] | None = None
+    amount_unit: Literal["lb", "kg"] | None = None
+    sets: int | None = None
+    reps: int | None = None
+
+
+class ExtractDraft(BaseModel):
+    """LLM output only. Native lb/kg; no kilograms, dates, or catalog ids."""
+    kind: Literal["single_session", "macro_goal"]
+    weeks: int | None = None
+    declared_fatigue: str | None = None
+    asks_substitution: bool = False
+    items: list[DraftItem]
+
+
 class ExtractedPrompt(BaseModel):
     kind: PromptKind
     items: list[ProposedItem]
@@ -192,7 +219,7 @@ class ExtractedPrompt(BaseModel):
     declared_fatigue: str | None = None
     asks_substitution: bool = False
     unit: Unit | None = None
-    raw_text: str
+    raw_text: str = ""
 
 
 class FactorScores(BaseModel):
@@ -312,17 +339,18 @@ Cold start: catalog match **and** no sets/1RM for that `exercise_id` → halt an
 
 ## 8. Prompt extraction
 
-`services/extract.py` returns `ExtractedPrompt`.
+Fail-closed. `create_app` raises if `OLLAMA_BASE_URL` is empty. There is no regex extractor.
 
-1. Call the Pydantic AI agent with `output_type=ExtractedPrompt` (minus `exercise_id`; resolver fills ids later).
-2. On missing client, timeout, connection/validation/`AgentRunError`, empty session items, or a macro missing target → `HaltReason.extract_failed`.
-3. Tests never call the network; inject a fake extract client.
+1. Pydantic AI agent, `output_type=NativeOutput(ExtractDraft)` (Ollama JSON schema). Amounts stay in spoken `lb`/`kg`. Nicknames stay as spoken. Few-shot examples are the `"fewshot": true` rows in `tests/fixtures/golden_extract.json`.
+2. `extract_prompt` maps `ExtractDraft` → `ExtractedPrompt` (`to_kg` when a unit is named; weeks from draft or from the raw text: `N weeks`, `a month`/`next month` → 4, `N months` → N×4, `30 days` → 4). Tests may inject a fake that returns `ExtractDraft` or `ExtractedPrompt`.
+3. Timeout, connection/validation/`AgentRunError`/`UnexpectedModelBehavior`, empty session items, or a macro missing both an absolute target and a delta item → `HaltReason.extract_failed`.
+4. Tests never call the network. Optional live gold eval: `OVERDONE_LIVE_EXTRACT=1 uv run python scripts/eval_extract_live.py`.
 
 **Unit guard.** If baseline sessions/benchmarks contain **both** `lb` and `kg` (after normalizing stored kg, keep original unit on the row) **and** the prompt has a magnitude with no unit → halt `ambiguous_units`. If baseline is single-unit, inherit that unit.
 
 **Kind.**
 
-- Macro if a future horizon + target load appears (`225 by next month`).
+- Macro if a future horizon + target load appears (`225 by next month`, `over the next 4 weeks`). Relative macros (`add 30 lb in 6 weeks`) keep `delta_kg`; evaluate sets `target_weight_kg = last + delta`.
 - Otherwise single-session (one or more `ProposedItem`s).
 
 **Fatigue.** Copy the user’s clause into `declared_fatigue`; do not parse sleep hours into a score.
@@ -405,7 +433,7 @@ Scope disclaimer warning when `asks_substitution`:
 
 ## 10. RAG (query time)
 
-LlamaIndex **writes** the index. `retrieve_context` **reads** the same `data_embeddings` rows over SQL/pgvector. Pydantic AI is the required extractor when `OLLAMA_BASE_URL` is set, not the retrieve agent. MCP tools must not re-implement ingest.
+LlamaIndex **writes** the index. `retrieve_context` **reads** the same `data_embeddings` rows over SQL/pgvector. Pydantic AI is the required extractor (`OLLAMA_BASE_URL`), not the retrieve agent. MCP tools must not re-implement ingest.
 
 Retrieve (k=4) for:
 
@@ -465,9 +493,12 @@ POSTGRES_PASSWORD=overdone
 POSTGRES_DB=overdone
 DATABASE_URL=postgresql+asyncpg://overdone:overdone@db:5432/overdone
 EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
-OLLAMA_BASE_URL=http://ollama:11434/v1
+EMBEDDING_DIMENSIONS=384
+OLLAMA_BASE_URL=http://127.0.0.1:11434/v1
 OLLAMA_MODEL=llama3.2
 ```
+
+Host Ollama is the default. Compose API may override to `http://host.docker.internal:11434/v1` or `http://ollama:11434/v1` with `--profile llm`.
 
 Local `.env` is gitignored. Do not read or commit `.env.production`.
 
@@ -478,7 +509,8 @@ Confirm these public seams; tests do not reach into private helpers or the live 
 | Seam | How |
 | :--- | :--- |
 | Scoring + lights | Pure functions, fixture logs, literal expected % and lights |
-| Extractor | Injected fake client; fail-closed `extract_failed` |
+| Extractor | Injected fake client; fail-closed `extract_failed`; mapper tests vs gold JSON |
+| Live extract (optional) | `OVERDONE_LIVE_EXTRACT=1`; not pytest |
 | Baseline replace | API `TestClient` + Postgres testcontainer / compose |
 | Evaluate orchestrator | Fake retrieve + real scoring; halt paths |
 | RAG retrieve | Fixture embeddings, assert `source_id`s |
@@ -503,5 +535,5 @@ Do not use SQLite as a stand-in for Postgres/pgvector.
 | No substitutions | 8, 9.5 |
 | Extreme prompts, standard math | 9 |
 | Stateless prompts | 3, 5.3 |
-| FastMCP, optional Pydantic AI extract, pgvector, MiniLM, free-exercise-db | 3, 6, 8, 10, 12 |
+| FastMCP, required Pydantic AI extract, pgvector, MiniLM, free-exercise-db | 3, 6, 8, 10, 12 |
 | DoD container / seed / tools / UI | 14, 6, 12, 13 |

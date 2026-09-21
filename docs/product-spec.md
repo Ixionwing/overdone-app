@@ -72,6 +72,8 @@
 
 ## 5. Definition of Done (DoD) for Agentic Coding Harness
 
+Local (non-Compose) evaluate, baseline, extract, and MCP paths have been exercised. Leave Compose/Docker boxes unchecked until `docker compose` is verified.
+
 - [ ] **Container Readiness**: PostgreSQL 16 + `pgvector` container starts via `docker compose` and passes health checks.
 - [ ] **Seeding Pipeline**: Open-source `free-exercise-db` is seeded and enriched with local axial load and joint stress metadata.
 - [ ] **Baseline Ingestion**: Plain-text and JSON log importer populates baseline user exercise history.

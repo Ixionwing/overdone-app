@@ -8,9 +8,9 @@
 
 **Tech stack:** Python 3.12, FastAPI, FastMCP, SQLAlchemy 2.x, Alembic, LlamaIndex ingest writer, required Pydantic AI extractor, sentence-transformers `all-MiniLM-L6-v2`, PostgreSQL 16 + pgvector, Next.js App Router, Docker Compose.
 
-**Companion spec:** `docs/technical-spec.md`. `product-spec.md` wins on product behavior.
+**Companion spec:** `docs/technical-spec.md`. `docs/product-spec.md` wins on product behavior.
 
-**Confirmed:** required Ollama (or other OpenAI-compatible `/v1`) for extract; no regex fallback; Next.js UI; no auth. Historical slices below still mention the old optional-heuristic fork.
+**Confirmed:** required Ollama (or other OpenAI-compatible `/v1`) for extract; no regex fallback; Next.js UI; no auth. Slices A–E below are the original build order. Extract is fail-closed LLM (`ExtractDraft` → mapper); do not restore a heuristic extractor.
 
 ## Slices (do these in order)
 
@@ -73,10 +73,14 @@ backend/src/overdone/models/exercise.py
 backend/src/overdone/models/user_log.py
 backend/src/overdone/schemas/dto.py
 backend/src/overdone/schemas/api.py
+backend/src/overdone/schemas/extract_draft.py
 backend/src/overdone/services/units.py
 backend/src/overdone/services/scoring.py
 backend/src/overdone/services/narrative.py
 backend/src/overdone/services/extract.py
+backend/src/overdone/services/extract_llm.py
+backend/src/overdone/services/extract_map.py
+backend/src/overdone/services/extract_gold.py
 backend/src/overdone/services/resolve.py
 backend/src/overdone/services/baseline.py
 backend/src/overdone/services/retrieve.py
@@ -87,6 +91,9 @@ backend/tests/conftest.py
 backend/tests/test_scoring.py
 backend/tests/test_narrative.py
 backend/tests/test_extract.py
+backend/tests/test_extract_map.py
+backend/tests/fixtures/golden_extract.json
+backend/scripts/eval_extract_live.py
 backend/tests/test_resolve.py
 backend/tests/test_baseline_api.py
 backend/tests/test_evaluate_api.py
@@ -238,7 +245,7 @@ async def replace_baseline_from_text(session: AsyncSession, text: str) -> Baseli
 async def get_baseline(session: AsyncSession) -> Baseline: ...
 ```
 
-`PUT /api/v1/baseline` body = technical spec §5.2. Replace is wipe+insert in one transaction. Text path: parse JSON if the blob is JSON, else a date-line / `NxN @ weight` heuristic sufficient for tests.
+`PUT /api/v1/baseline` body = technical spec §5.2. Replace is wipe+insert in one transaction. Text path: parse JSON if the blob is JSON, else a date-line / `NxN @ weight` log parser sufficient for tests.
 
 - [ ] TestClient against Postgres:
 
@@ -341,20 +348,20 @@ Use kg in the scorer. Convert in tests via `lb_to_kg`. Assert lights and `volume
 
 Verify: `cd backend && pytest tests/test_scoring.py tests/test_narrative.py -v`
 
-### Task C2: Heuristic extractor
+### Task C2: LLM extractor (fail-closed)
 
 **Files:**
-- Create: `backend/src/overdone/services/extract.py`, `backend/tests/test_extract.py`
+- Create: `backend/src/overdone/services/extract.py`, `extract_llm.py`, `extract_map.py`, `extract_gold.py`, `schemas/extract_draft.py`, `backend/tests/test_extract.py`, `test_extract_map.py`
 
-**Interfaces:** `async def extract_prompt(text: str, *, llm_client: object | None = None) -> ExtractedPrompt`
+**Interfaces:** `async def extract_prompt(text: str, *, llm_client: object | None) -> ExtractedPrompt`
 
-Tests pass `llm_client=None` for the heuristic matrix; fakes cover timeout/validation fallback and unexpected errors. Mixed-unit halt is **not** the extractor’s job; omitted unit → `unit=None`.
+`llm_client` is required at evaluate time (`ExtractError` if missing). The live client is Pydantic AI `NativeOutput(ExtractDraft)`; Python maps to `ExtractedPrompt`. Tests inject `ScriptedExtractClient` or a draft fake. No network in pytest. Missing `OLLAMA_BASE_URL` → `create_app` raises; no regex fallback.
 
-Assert the product-spec prompt set: +20 lb single item; three-item session; 225 squat / `weeks=4`; fatigue copied; substitution flag; `"Add 200 to Bench"` has `unit=None`.
+Mixed-unit halt is **not** the extractor’s job; omitted unit → `unit=None`.
 
-Optional Pydantic AI wrap when `OLLAMA_BASE_URL` is set; failures fall back to heuristic. No network in tests.
+Assert: missing client / timeout / invalid output → `ExtractError`; catalog ids stripped; gold mapper rows; scripted product-spec prompts in evaluate tests.
 
-Verify: `cd backend && pytest tests/test_extract.py -v`
+Verify: `cd backend && pytest tests/test_extract.py tests/test_extract_map.py -v`
 
 ### Task C3: Stub resolve + evaluate HTTP
 
@@ -517,5 +524,5 @@ One commit per finished slice is enough; split further only if a slice is large:
 
 - Slice C is the first *product* increment. A and B exist so C is not a 20-file bang.
 - Do not implement substitution generation, auth, or a second vector store if a test is red.
-- If Ollama is missing, extraction stays heuristic; DoD must still pass on the product-spec prompt set.
+- If Ollama is missing, the API must not start. Pytest uses a scripted extract client; optional live gold eval is `OVERDONE_LIVE_EXTRACT=1`.
 - After a slice, stop and demo before starting the next.
