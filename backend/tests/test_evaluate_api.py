@@ -129,6 +129,21 @@ def test_multi_movement_itemizes_three(client: TestClient) -> None:
     assert "pushdown" in names
 
 
+def test_pushdown_sets_reps_and_weight_change_volume(client: TestClient) -> None:
+    _put(client)
+    response = client.post(
+        "/api/v1/evaluate",
+        json={
+            "prompt": ("I want to make my cable pushdown 3 sets of 10 reps, 45lbs each")
+        },
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["halted"] is None
+    assert "pushdown" in body["items"][0]["exercise_name"].casefold()
+    assert body["items"][0]["factors"]["volume_jump_pct"] == -6.2
+
+
 def test_macro_225_squat_next_month(client: TestClient) -> None:
     _put(client)
     response = client.post(

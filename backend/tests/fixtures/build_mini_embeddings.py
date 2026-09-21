@@ -42,6 +42,8 @@ QUERIES = [
     "add 20 lbs to bench press",
     "Add 20 lbs to bench tomorrow",
     "Add 20 lbs to medium grip barbell bench tomorrow.",
+    "I want to make my cable pushdown 3 sets of 10 reps, 45lbs each",
+    "Add 20 lbs to Bench tomorrow, 3 sets of 8",
     "I want to add 20 lbs to my bench press tomorrow",
     "Tomorrow: +10 lbs Bench, +5 lbs Incline DB Press, +3 sets Pushdowns.",
     "Reach a 225 lb Squat by next month.",

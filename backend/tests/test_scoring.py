@@ -25,6 +25,40 @@ def _press_enrichment() -> dict[str, ExerciseEnrichment]:
     return {"bench": DEFAULT_ENRICHMENT, "row": DEFAULT_ENRICHMENT}
 
 
+def test_sets_and_reps_change_volume_not_only_weight():
+    last = LogSet(
+        exercise_id="pushdown",
+        exercise_name="Cable Pushdown",
+        weight_kg=lb_to_kg(40),
+        reps=12,
+        sets=3,
+    )
+    weight_only = [
+        ProposedItem(
+            exercise_name="Cable Pushdown",
+            exercise_id="pushdown",
+            weight_kg=lb_to_kg(45),
+        )
+    ]
+    full = [
+        ProposedItem(
+            exercise_name="Cable Pushdown",
+            exercise_id="pushdown",
+            weight_kg=lb_to_kg(45),
+            sets=3,
+            reps=10,
+        )
+    ]
+    _overall_w, weight_verdicts, _ = score_session(
+        weight_only, {"pushdown": last}, {"pushdown": DEFAULT_ENRICHMENT}
+    )
+    _overall_f, full_verdicts, _ = score_session(
+        full, {"pushdown": last}, {"pushdown": DEFAULT_ENRICHMENT}
+    )
+    assert weight_verdicts[0].factors.volume_jump_pct == 12.5
+    assert full_verdicts[0].factors.volume_jump_pct == -6.2
+
+
 def test_plus_20lb_bench_volume_jump_is_yellow_band():
     items = [
         ProposedItem(

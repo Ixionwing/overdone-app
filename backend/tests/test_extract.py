@@ -16,6 +16,49 @@ def _extract(text: str):
     return asyncio.run(extract_prompt(text, llm_client=None))
 
 
+def test_sets_reps_and_weight_on_named_lift():
+    result = _extract("I want to make my cable pushdown 3 sets of 10 reps, 45lbs each")
+    assert result.kind is PromptKind.single_session
+    assert len(result.items) == 1
+    assert result.unit is Unit.lb
+    item = result.items[0]
+    assert "pushdown" in item.exercise_name.casefold()
+    assert item.sets == 3
+    assert item.reps == 10
+    assert item.weight_kg is not None
+    assert abs(item.weight_kg - 20.41165665) < 1e-6
+
+
+def test_weight_delta_also_reads_sets_and_reps():
+    result = _extract("Add 20 lbs to Bench tomorrow, 3 sets of 8")
+    assert len(result.items) == 1
+    assert result.items[0].sets == 3
+    assert result.items[0].reps == 8
+    assert result.items[0].delta_kg is not None
+    assert abs(result.items[0].delta_kg - 9.0718474) < 1e-6
+
+
+def test_empty_llm_extract_falls_back_to_heuristic():
+    class EmptyExtractor:
+        async def extract(self, text: str) -> ExtractedPrompt:
+            return ExtractedPrompt(
+                kind=PromptKind.single_session,
+                items=[],
+                raw_text=text,
+            )
+
+    result = asyncio.run(
+        extract_prompt(
+            "I want to make my cable pushdown 3 sets of 10 reps, 45lbs each",
+            llm_client=EmptyExtractor(),
+        )
+    )
+    assert len(result.items) == 1
+    assert "pushdown" in result.items[0].exercise_name.casefold()
+    assert result.items[0].sets == 3
+    assert result.items[0].reps == 10
+
+
 def test_add_20_lbs_to_db_bench():
     result = _extract("Add 20 lbs to DB Bench Press tomorrow.")
     assert result.kind is PromptKind.single_session

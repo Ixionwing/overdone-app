@@ -53,6 +53,15 @@ _PRESCRIPTION = re.compile(
     r"(\d+)\s+sets?\s+of\s+(\d+(?:\.\d+)?)\s*(lbs?|kg)\s+(.+)",
     re.I,
 )
+_SETS_REPS_WEIGHT = re.compile(
+    r"(.+?)\s+(\d+)\s+sets?\s+of\s+(\d+)\s+reps?,?\s*"
+    r"(?:(?:at|@)\s*)?(\d+(?:\.\d+)?)\s*(lbs?|kg)\s*(?:each)?",
+    re.I,
+)
+_SETS_REPS = re.compile(
+    r"(\d+)\s+sets?\s+of\s+(\d+)(?:\s+reps?)?",
+    re.I,
+)
 _SUBSTITUTION = (
     "what should i do instead",
     "tell me what to do instead",
@@ -73,9 +82,31 @@ def _norm_unit(raw: str | None) -> Unit | None:
 
 def _clean_name(name: str) -> str:
     cleaned = re.sub(r"\s+", " ", name).strip(" .,")
-    cleaned = re.sub(r"^(?:my\s+)", "", cleaned, flags=re.I)
+    cleaned = re.sub(
+        r"^(?:i want to\s+|want to\s+|make\s+(?:my\s+)?|my\s+)+",
+        "",
+        cleaned,
+        flags=re.I,
+    )
     cleaned = re.sub(r"\s+tomorrow$", "", cleaned, flags=re.I)
+    cleaned = re.sub(r",$", "", cleaned).strip(" .,")
     return cleaned
+
+
+def _apply_sets_reps(items: list[ProposedItem], raw: str) -> list[ProposedItem]:
+    if len(items) != 1:
+        return items
+    item = items[0]
+    if item.sets is not None or item.reps is not None or item.extra_sets is not None:
+        return items
+    match = _SETS_REPS.search(raw)
+    if match is None:
+        return items
+    return [
+        item.model_copy(
+            update={"sets": int(match.group(1)), "reps": int(match.group(2))}
+        )
+    ]
 
 
 def _delta_kg(amount: float, unit: Unit | None) -> float:
@@ -160,6 +191,19 @@ def extract_heuristic(text: str) -> ExtractedPrompt:
             )
 
     if not items:
+        for match in _SETS_REPS_WEIGHT.finditer(raw):
+            unit_seen = _norm_unit(match.group(5)) or unit_seen
+            amount = float(match.group(4))
+            items.append(
+                ProposedItem(
+                    exercise_name=_clean_name(match.group(1)),
+                    weight_kg=(to_kg(amount, unit_seen.value) if unit_seen else amount),
+                    sets=int(match.group(2)),
+                    reps=int(match.group(3)),
+                )
+            )
+
+    if not items:
         for match in _PRESCRIPTION.finditer(raw):
             unit_seen = _norm_unit(match.group(3)) or unit_seen
             amount = float(match.group(2))
@@ -170,6 +214,8 @@ def extract_heuristic(text: str) -> ExtractedPrompt:
                     sets=int(match.group(1)),
                 )
             )
+
+    items = _apply_sets_reps(items, raw)
 
     return ExtractedPrompt(
         kind=PromptKind.single_session,
@@ -193,7 +239,9 @@ async def extract_prompt(
                 if inspect.isawaitable(result):
                     result = await result
                 if isinstance(result, ExtractedPrompt):
-                    return _without_catalog_ids(result)
+                    cleaned = _without_catalog_ids(result)
+                    if cleaned.items or cleaned.kind is PromptKind.macro_goal:
+                        return cleaned
             except _LLM_FALLBACK:
                 logger.warning(
                     "llm extract failed; falling back to heuristic",
