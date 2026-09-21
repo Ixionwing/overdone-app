@@ -30,16 +30,16 @@ uv run uvicorn overdone.main:app --reload --port 8000
 
 Set `OLLAMA_BASE_URL=http://127.0.0.1:11434/v1` (and `OLLAMA_MODEL=llama3.2`) before starting the API.
 
-Frontend: `cd frontend && npm ci && npm run dev`.
+Frontend: `cd frontend && npm ci && npm run dev`. The UI is Next.js 15 with Pigment CSS (webpack only — do not pass `--turbopack`). MUI packages are present; screens use Pigment `css()` rather than transforming `@mui/material`.
 
 ## Tests
 
 ```bash
 cd backend && uv run pytest -v
-cd frontend && npx tsc --noEmit
+cd frontend && npm test && npm run typecheck
 ```
 
-Pytest uses a fixture embedding map and does not download MiniLM or call Ollama.
+`npm test` is Vitest on the JSON parsers and copy helpers. Pytest uses a fixture embedding map and does not download MiniLM or call Ollama.
 
 ## Gold extract set
 
