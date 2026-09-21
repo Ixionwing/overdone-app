@@ -9,7 +9,7 @@ from pydantic_ai import UnexpectedModelBehavior
 from overdone.config import Settings
 from overdone.main import create_app
 from overdone.schemas.dto import ExtractedPrompt, PromptKind, ProposedItem, Unit
-from overdone.schemas.extract_draft import ExtractDraft
+from overdone.schemas.extract_draft import DraftItem, ExtractDraft
 from overdone.services.extract import ExtractError, extract_prompt
 from overdone.services.extract_llm import extract_client_from_settings
 
@@ -180,20 +180,22 @@ def test_create_app_requires_ollama_url() -> None:
         )
 
 
-def test_proposed_item_coerces_null_strings() -> None:
-    item = ProposedItem.model_validate(
+def test_draft_item_coerces_null_strings() -> None:
+    item = DraftItem.model_validate(
         {
-            "exercise_name": "bench press",
-            "reps": "null",
+            "name": "bench press",
+            "amount": "null",
+            "amount_kind": "null",
+            "amount_unit": "null",
             "sets": "null",
-            "extra_sets": "null",
-            "exercise_id": "null",
+            "reps": "null",
         }
     )
-    assert item.reps is None
+    assert item.amount is None
+    assert item.amount_kind is None
+    assert item.amount_unit is None
     assert item.sets is None
-    assert item.extra_sets is None
-    assert item.exercise_id is None
+    assert item.reps is None
 
 
 def test_extract_prompt_maps_draft() -> None:
@@ -250,15 +252,3 @@ def test_extract_prompt_keeps_macro_delta_draft() -> None:
     assert result.weeks == 6
     assert result.target_weight_kg is None
     assert result.items[0].delta_kg is not None
-
-
-def test_extracted_prompt_drops_relative_target_date() -> None:
-    extracted = ExtractedPrompt.model_validate(
-        {
-            "kind": "single_session",
-            "items": [{"exercise_name": "Bench", "delta_kg": 9.07}],
-            "target_date": "tomorrow",
-        }
-    )
-    assert extracted.target_date is None
-    assert extracted.raw_text == ""

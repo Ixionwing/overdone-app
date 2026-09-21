@@ -39,9 +39,7 @@ def session_narrative(
     return f"{first}. {second}."
 
 
-def macro_narrative(
-    verdict: ItemVerdict, weeks: int, *, sets: int, reps: int
-) -> str:
+def macro_narrative(verdict: ItemVerdict, weeks: int, *, sets: int, reps: int) -> str:
     first = (
         f"{verdict.exercise_name} over {weeks} weeks is {verdict.light.value} "
         f"against historical adaptation velocity"

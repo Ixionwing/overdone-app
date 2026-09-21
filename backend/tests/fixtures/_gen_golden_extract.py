@@ -1,4 +1,12 @@
-"""Write tests/fixtures/golden_extract.json. Run once from backend/."""
+"""Regenerate tests/fixtures/golden_extract.json from this module.
+
+Edit this file, then from backend/:
+
+    uv run python tests/fixtures/_gen_golden_extract.py
+
+Do not hand-edit golden_extract.json. Rows with fewshot=True are the
+Ollama instruction examples loaded by extract_llm.
+"""
 
 from __future__ import annotations
 

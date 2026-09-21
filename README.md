@@ -41,6 +41,25 @@ cd frontend && npx tsc --noEmit
 
 Pytest uses a fixture embedding map and does not download MiniLM or call Ollama.
 
+## Gold extract set
+
+The in-scope extract examples live in `backend/tests/fixtures/golden_extract.json`. Edit `backend/tests/fixtures/_gen_golden_extract.py`, then regenerate:
+
+```bash
+cd backend && uv run python tests/fixtures/_gen_golden_extract.py
+```
+
+Do not hand-edit the JSON. Rows with `"fewshot": true` are the Ollama instruction examples.
+
+## Live extract eval (optional)
+
+Pytest never calls Ollama. To score the running model against the gold set:
+
+```bash
+cd backend
+OVERDONE_LIVE_EXTRACT=1 uv run python scripts/eval_extract_live.py
+```
+
 ## Specs
 
 - Product: `product-spec.md`

@@ -1,18 +1,14 @@
 from __future__ import annotations
 
-import json
-from pathlib import Path
-
 from overdone.schemas.dto import ExtractedPrompt, LogSet, PromptKind, ProposedItem, Unit
 from overdone.schemas.extract_draft import ExtractDraft
 from overdone.services.evaluate import macro_sets_reps, resolve_macro_target_kg
-from overdone.services.extract_llm import _FEWSHOT
+from overdone.services.extract_gold import load_golden_extract
+from overdone.services.extract_llm import _INSTRUCTIONS
 from overdone.services.extract_map import to_extracted_prompt, weeks_from_raw
 from overdone.services.units import lb_to_kg
 
-GOLD = json.loads(
-    (Path(__file__).resolve().parent / "fixtures" / "golden_extract.json").read_text()
-)
+GOLD = load_golden_extract()
 
 
 def _row(prompt: str) -> dict:
@@ -130,12 +126,11 @@ def test_resolve_macro_target_adds_delta_to_last() -> None:
     assert abs(target - (last + lb_to_kg(30))) < 1e-6
 
 
-def test_fewshot_rows_match_llm_examples() -> None:
+def test_fewshot_rows_are_in_extract_instructions() -> None:
     fewshot = [row for row in GOLD if row.get("fewshot")]
     assert len(fewshot) == 10
-    llm = {prompt: draft for prompt, draft in _FEWSHOT}
     for row in fewshot:
-        assert llm[row["prompt"]] == row["draft"]
+        assert row["prompt"] in _INSTRUCTIONS
 
 
 def test_macro_sets_reps_prefers_named_prescription() -> None:

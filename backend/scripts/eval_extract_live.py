@@ -6,18 +6,13 @@ OVERDONE_LIVE_EXTRACT=1 uv run python scripts/eval_extract_live.py
 from __future__ import annotations
 
 import asyncio
-import json
 import os
 import sys
-from pathlib import Path
 
 from overdone.config import Settings
-from overdone.schemas.extract_draft import ExtractDraft
+from overdone.schemas.extract_draft import DraftItem, ExtractDraft
+from overdone.services.extract_gold import load_golden_extract
 from overdone.services.extract_llm import extract_client_from_settings
-
-GOLD = (
-    Path(__file__).resolve().parents[1] / "tests" / "fixtures" / "golden_extract.json"
-)
 
 
 def _amount_ok(expected: float | None, got: float | None) -> bool:
@@ -30,7 +25,7 @@ def _amount_ok(expected: float | None, got: float | None) -> bool:
     return abs(got - expected) / abs(expected) <= 0.01
 
 
-def _item_ok(expected: dict, got) -> bool:
+def _item_ok(expected: dict, got: DraftItem) -> bool:
     if expected.get("amount_kind") != (
         got.amount_kind.value if got.amount_kind else None
     ):
@@ -65,13 +60,13 @@ async def _run() -> int:
     if client is None:
         print("fail: OLLAMA_BASE_URL is not set")
         return 1
-    rows = json.loads(GOLD.read_text())
+    rows = load_golden_extract()
     ok = 0
     for row in rows:
         prompt = row["prompt"]
         try:
             draft = await client.extract(prompt)
-        except Exception as exc:  # noqa: BLE001 — live script reports any failure
+        except Exception as exc:
             print(f"extract_failed\t{row['id']}\t{exc}")
             continue
         reason = _row_ok(row, draft)

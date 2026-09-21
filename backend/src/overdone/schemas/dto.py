@@ -1,7 +1,7 @@
-from datetime import date, datetime
+from datetime import date
 from enum import StrEnum
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 
 class TrafficLight(StrEnum):
@@ -68,19 +68,6 @@ class ProposedItem(BaseModel):
     sets: int | None = None
     extra_sets: int | None = None
 
-    @field_validator(
-        "exercise_id",
-        "weight_kg",
-        "delta_kg",
-        "reps",
-        "sets",
-        "extra_sets",
-        mode="before",
-    )
-    @classmethod
-    def optional_null_strings(cls, value: object) -> object:
-        return _blank_as_none(value)
-
 
 class ExtractedPrompt(BaseModel):
     kind: PromptKind
@@ -93,37 +80,6 @@ class ExtractedPrompt(BaseModel):
     asks_substitution: bool = False
     unit: Unit | None = None
     raw_text: str = ""
-
-    @field_validator(
-        "weeks",
-        "target_weight_kg",
-        "target_exercise_name",
-        "declared_fatigue",
-        "unit",
-        mode="before",
-    )
-    @classmethod
-    def optional_null_strings(cls, value: object) -> object:
-        return _blank_as_none(value)
-
-    @field_validator("target_date", mode="before")
-    @classmethod
-    def optional_iso_date(cls, value: object) -> object:
-        if value is None:
-            return None
-        cleaned = _blank_as_none(value)
-        if cleaned is None:
-            return None
-        if isinstance(cleaned, datetime):
-            return cleaned.date()
-        if isinstance(cleaned, date):
-            return cleaned
-        if isinstance(cleaned, str):
-            try:
-                return date.fromisoformat(cleaned[:10])
-            except ValueError:
-                return None
-        return None
 
 
 class FactorScores(BaseModel):
