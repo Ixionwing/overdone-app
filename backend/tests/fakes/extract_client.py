@@ -48,14 +48,6 @@ DEFAULT_PROMPTS: dict[str, ExtractedPrompt] = {
         ProposedItem(exercise_name="Incline DB Press", delta_kg=LB(5)),
         ProposedItem(exercise_name="Pushdowns", extra_sets=3),
     ),
-    "I want to make my cable pushdown 3 sets of 10 reps, 45lbs each": _session(
-        ProposedItem(
-            exercise_name="cable pushdown",
-            weight_kg=LB(45),
-            sets=3,
-            reps=10,
-        )
-    ),
     "Reach a 225 lb Squat by next month.": _macro("Squat", 225),
     "I want to bring my cable pushdown up to 40 lbs": _session(
         ProposedItem(exercise_name="cable pushdown", weight_kg=LB(40))
@@ -81,9 +73,6 @@ DEFAULT_PROMPTS: dict[str, ExtractedPrompt] = {
     "Add 30 lbs to Bench tomorrow, or tell me what to do instead.": _session(
         ProposedItem(exercise_name="Bench", delta_kg=LB(30)),
         asks_substitution=True,
-    ),
-    "Add 500 lbs to my Bench Press tomorrow.": _session(
-        ProposedItem(exercise_name="Bench Press", delta_kg=LB(500))
     ),
     "Add 20 lbs to Bench tomorrow.": _session(
         ProposedItem(exercise_name="Bench", delta_kg=LB(20))

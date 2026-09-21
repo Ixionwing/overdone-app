@@ -11,7 +11,7 @@ docker compose up --build
 
 - UI: http://localhost:3000
 - API: http://localhost:8000/health
-- MCP: http://localhost:8000/mcp
+- MCP: http://localhost:8000/mcp (Cursor: `.cursor/mcp.json`; see `docs/cursor-mcp-workflow.md`)
 
 API startup migrates Postgres and seeds `data/free-exercise-db/exercises.json` (yuhonas/free-exercise-db, Unlicense) when the catalog is empty. MiniLM weights live in the `hf_cache` volume. Tests still use the mini fixture, which includes the lifts in the sample log.
 
@@ -66,4 +66,6 @@ OVERDONE_LIVE_EXTRACT=1 uv run python scripts/eval_extract_live.py
 
 ## Specs
 
+- Architecture, stack, and decisions: `docs/architecture.md`
+- Cursor MCP workflow (clone-and-run): `docs/cursor-mcp-workflow.md`
 - Extract gold (human): `docs/golden-extract-dataset.md`

@@ -90,10 +90,11 @@ def test_seed_catalog_is_idempotent_and_384d(postgres_url: str) -> None:
         name_count,
         exercise_chunks,
     ) = asyncio.run(run())
-    assert first == 5
-    assert second == 5
-    assert exercise_count == 5
-    assert exercise_chunks == 5
+    expected = len(exercises)
+    assert first == expected
+    assert second == expected
+    assert exercise_count == expected
+    assert exercise_chunks == expected
     assert name_count >= 16
     assert chunk_count == exercise_chunks + name_count
     assert dim == 384

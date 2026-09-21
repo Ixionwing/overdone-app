@@ -1,0 +1,17 @@
+---
+description: How to score Overdone increments from Cursor via MCP
+alwaysApply: true
+---
+
+# Overdone MCP
+
+The API must be running at `http://127.0.0.1:8000` (Ollama + Postgres too). Tools are on `/mcp`.
+
+Score with `evaluate_prompt`. Prefer `log` (paste or `@data/sample_baseline.txt`) so the browser singleton is not overwritten. Use `replace_baseline_text` / `replace_baseline_json` only when the operator wants the left pane updated.
+
+What-if = N separate `evaluate_prompt` calls with the same `log`, not a batch tool. Rewrite messy English in the thread, then score **only** the rewrite. Do not invent Green/Yellow/Red in prose, do not coach around Red, and do not persist lights. `extract` on the tool result is how you inspect phrasing.
+
+```
+evaluate_prompt({ prompt: "I want to add 20 lbs to my bench press tomorrow", log: <sample or paste> })
+evaluate_prompt({ prompt: "I want to add 5 lbs to my bench press tomorrow", log: <same log> })
+```

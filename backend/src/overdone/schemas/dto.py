@@ -117,6 +117,7 @@ class EvaluationResult(BaseModel):
     session_factors: FactorScores | None = None
     narrative: str | None = None
     warnings: list[WarningFlag] = Field(default_factory=list)
+    extract: dict | None = None
 
 
 class ExerciseEnrichment(BaseModel):

@@ -1,14 +1,74 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
+from dataclasses import dataclass, field
 from datetime import date
+from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from overdone.models.user_log import UserBenchmark, UserSession, UserSettings
+from overdone.schemas.api import BaselineImport
 from overdone.schemas.dto import ExtractedPrompt, LogSet, ProposedItem, Unit
 from overdone.services.units import to_kg
+
+
+@dataclass
+class MemorySet:
+    exercise_name: str
+    weight_kg: float
+    reps: int
+    sets: int
+    unit: str
+
+
+@dataclass
+class MemorySession:
+    logged_on: date
+    notes: str | None = None
+    sets: list[MemorySet] = field(default_factory=list)
+
+
+@dataclass
+class MemoryBenchmark:
+    exercise_name: str
+    one_rm_kg: float
+    unit: str
+
+
+def history_from_import(
+    payload: BaselineImport,
+) -> tuple[list[MemorySession], list[MemoryBenchmark], str]:
+    preferred = payload.preferred_unit
+    sessions = [
+        MemorySession(
+            logged_on=logged.date,
+            notes=logged.notes,
+            sets=[
+                MemorySet(
+                    exercise_name=item.exercise,
+                    weight_kg=to_kg(item.weight, (item.unit or preferred).lower()),
+                    reps=item.reps,
+                    sets=item.sets,
+                    unit=(item.unit or preferred).lower(),
+                )
+                for item in logged.sets
+            ],
+        )
+        for logged in payload.sessions
+    ]
+    sessions.sort(key=lambda row: row.logged_on, reverse=True)
+    benchmarks = [
+        MemoryBenchmark(
+            exercise_name=row.exercise,
+            one_rm_kg=to_kg(row.one_rm, (row.unit or preferred).lower()),
+            unit=(row.unit or preferred).lower(),
+        )
+        for row in payload.benchmarks
+    ]
+    return sessions, benchmarks, preferred
 
 
 async def load_history(
@@ -31,9 +91,7 @@ async def load_history(
     return sessions, benchmarks, preferred
 
 
-def stored_units(
-    sessions: list[UserSession], benchmarks: list[UserBenchmark]
-) -> set[str]:
+def stored_units(sessions: Sequence[Any], benchmarks: Sequence[Any]) -> set[str]:
     units = {row.unit for row in benchmarks}
     for logged in sessions:
         for item in logged.sets:
@@ -41,9 +99,7 @@ def stored_units(
     return units
 
 
-def baseline_names(
-    sessions: list[UserSession], benchmarks: list[UserBenchmark]
-) -> list[str]:
+def baseline_names(sessions: Sequence[Any], benchmarks: Sequence[Any]) -> list[str]:
     names: list[str] = []
     seen: set[str] = set()
     for logged in sessions:
@@ -79,7 +135,9 @@ def inherit_unit(extracted: ExtractedPrompt, unit: Unit) -> ExtractedPrompt:
 
 
 def last_working(
-    names: set[str], sessions: list[UserSession], benchmarks: list[UserBenchmark]
+    names: set[str],
+    sessions: Sequence[Any],
+    benchmarks: Sequence[Any],
 ) -> LogSet | None:
     folded = {name.casefold() for name in names if name}
     for logged in sessions:
@@ -107,7 +165,7 @@ def last_working(
     return None
 
 
-def weekly_velocity(names: set[str], sessions: list[UserSession]) -> float:
+def weekly_velocity(names: set[str], sessions: Sequence[Any]) -> float:
     folded = {name.casefold() for name in names if name}
     points: list[tuple[date, float]] = []
     chronological = list(reversed(sessions))

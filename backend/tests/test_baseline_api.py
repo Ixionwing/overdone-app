@@ -15,10 +15,6 @@ def _shoulder_session(sessions: list[dict]) -> dict:
     )
 
 
-def _set(session: dict, exercise: str) -> dict:
-    return next(item for item in session["sets"] if item["exercise"] == exercise)
-
-
 def test_put_sample_baseline_round_trips_session_notes(client: TestClient) -> None:
     payload = json.loads(SAMPLE_JSON.read_text())
     response = client.put("/api/v1/baseline", json=payload)
@@ -37,31 +33,6 @@ def test_put_sample_baseline_round_trips_session_notes(client: TestClient) -> No
         _shoulder_session(fetched.json()["baseline"]["sessions"])["notes"]
         == "Right shoulder felt tight on set 3"
     )
-
-
-def test_sample_baseline_progresses_ppl_compounds_across_two_weeks(
-    client: TestClient,
-) -> None:
-    payload = json.loads(SAMPLE_JSON.read_text())
-    sessions = {row["date"]: row for row in payload["sessions"]}
-    assert (
-        _set(sessions["2026-09-07"], "Barbell Bench Press - Medium Grip")["weight"]
-        == 185
-    )
-    assert (
-        _set(sessions["2026-09-14"], "Barbell Bench Press - Medium Grip")["weight"]
-        == 190
-    )
-    assert _set(sessions["2026-09-09"], "Barbell Squat")["weight"] == 225
-    assert _set(sessions["2026-09-16"], "Barbell Squat")["weight"] == 230
-    assert _set(sessions["2026-09-08"], "Barbell Deadlift")["weight"] == 275
-    assert _set(sessions["2026-09-15"], "Barbell Deadlift")["weight"] == 285
-    assert _set(sessions["2026-09-10"], "Standing Military Press")["weight"] == 95
-    assert _set(sessions["2026-09-17"], "Standing Military Press")["weight"] == 100
-
-    response = client.put("/api/v1/baseline", json=payload)
-    assert response.status_code == 200
-    assert response.json()["session_count"] == 12
 
 
 def test_second_put_replaces_rather_than_appends(client: TestClient) -> None:

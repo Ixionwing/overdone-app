@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
+from typing import Any
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from overdone.schemas.dto import (
@@ -15,10 +18,12 @@ from overdone.schemas.dto import (
     Unit,
     WarningFlag,
 )
+from overdone.services.baseline import parse_baseline_text
 from overdone.services.bind import bind_name, load_enrichment, with_citation
 from overdone.services.extract import ExtractError, extract_prompt
 from overdone.services.history import (
     baseline_names,
+    history_from_import,
     inherit_unit,
     last_working,
     load_history,
@@ -30,7 +35,11 @@ from overdone.services.narrative import (
     scope_disclaimer,
     session_narrative,
 )
-from overdone.services.retrieve import note_banner, retrieve_context
+from overdone.services.retrieve import (
+    is_qualitative_note,
+    note_banner,
+    retrieve_context,
+)
 from overdone.services.scoring import score_macro, score_session
 
 _MISSING_BASELINE = "Import a training baseline before evaluating a prompt."
@@ -69,6 +78,39 @@ def _halt(
 ) -> EvaluationResult:
     return EvaluationResult(
         halted=Halt(reason=reason, message=message, exercise_name=exercise_name)
+    )
+
+
+def _inline_note_flags(sessions: Sequence[Any]) -> list[WarningFlag]:
+    flags: list[WarningFlag] = []
+    for logged in sessions:
+        text = (logged.notes or "").strip()
+        if not text or not is_qualitative_note(text):
+            continue
+        flags.append(
+            WarningFlag(
+                kind="qualitative_note",
+                message=note_banner(logged.logged_on, text),
+                source_id=None,
+            )
+        )
+    return flags
+
+
+def _with_extract(
+    result: EvaluationResult,
+    extracted: ExtractedPrompt,
+    *,
+    extra_warnings: list[WarningFlag] | None = None,
+) -> EvaluationResult:
+    warnings = list(result.warnings)
+    if extra_warnings:
+        warnings.extend(extra_warnings)
+    return result.model_copy(
+        update={
+            "warnings": warnings,
+            "extract": extracted.model_dump(mode="json"),
+        }
     )
 
 
@@ -113,9 +155,21 @@ async def _retrieve_support(
 
 
 async def evaluate_prompt(
-    session: AsyncSession, prompt: str, *, llm_client: object | None = None
+    session: AsyncSession,
+    prompt: str,
+    *,
+    llm_client: object | None = None,
+    log_text: str | None = None,
 ) -> EvaluationResult:
-    sessions, benchmarks, preferred = await load_history(session)
+    inline = bool(log_text and log_text.strip())
+    if inline:
+        sessions, benchmarks, preferred = history_from_import(
+            parse_baseline_text(log_text or "")
+        )
+        note_flags = _inline_note_flags(sessions)
+    else:
+        sessions, benchmarks, preferred = await load_history(session)
+        note_flags = []
     if not sessions and not benchmarks:
         return _halt(HaltReason.missing_baseline, _MISSING_BASELINE)
 
@@ -124,9 +178,12 @@ async def evaluate_prompt(
     except ExtractError:
         return _halt(HaltReason.extract_failed, _EXTRACT_FAILED)
 
+    def finish(result: EvaluationResult) -> EvaluationResult:
+        return _with_extract(result, extracted, extra_warnings=note_flags)
+
     stored = stored_units(sessions, benchmarks)
     if extracted.unit is None and len(stored) > 1:
-        return _halt(HaltReason.ambiguous_units, _AMBIGUOUS_UNITS)
+        return finish(_halt(HaltReason.ambiguous_units, _AMBIGUOUS_UNITS))
 
     inherit = Unit(next(iter(stored)) if len(stored) == 1 else preferred)
     extracted = inherit_unit(extracted, inherit)
@@ -137,25 +194,31 @@ async def evaluate_prompt(
         raw_name = extracted.target_exercise_name or ""
         history, catalog_id = await bind_name(session, raw_name, names)
         if history is None:
-            return _halt(
-                HaltReason.missing_exercise,
-                _MISSING_EXERCISE.format(name=raw_name or "that exercise"),
-                exercise_name=raw_name or None,
+            return finish(
+                _halt(
+                    HaltReason.missing_exercise,
+                    _MISSING_EXERCISE.format(name=raw_name or "that exercise"),
+                    exercise_name=raw_name or None,
+                )
             )
         last = last_working({history, raw_name}, sessions, benchmarks)
         if last is None:
-            return _halt(
-                HaltReason.missing_exercise,
-                _MISSING_EXERCISE.format(name=history),
-                exercise_name=history,
+            return finish(
+                _halt(
+                    HaltReason.missing_exercise,
+                    _MISSING_EXERCISE.format(name=history),
+                    exercise_name=history,
+                )
             )
         weeks = extracted.weeks or 4
         target = resolve_macro_target_kg(extracted, last.weight_kg)
         if target is None:
-            return _halt(
-                HaltReason.missing_exercise,
-                "Macro goal is missing a target weight.",
-                exercise_name=history,
+            return finish(
+                _halt(
+                    HaltReason.missing_exercise,
+                    "Macro goal is missing a target weight.",
+                    exercise_name=history,
+                )
             )
         sets, reps = macro_sets_reps(extracted, last)
         enrich = await load_enrichment(session, catalog_id)
@@ -181,12 +244,14 @@ async def evaluate_prompt(
         )
         flags.extend(extra)
         verdict = await with_citation(session, verdict, citations, catalog_id)
-        return EvaluationResult(
-            overall_light=verdict.light,
-            items=[verdict],
-            session_factors=verdict.factors,
-            narrative=macro_narrative(verdict, weeks, sets=sets, reps=reps),
-            warnings=flags,
+        return finish(
+            EvaluationResult(
+                overall_light=verdict.light,
+                items=[verdict],
+                session_factors=verdict.factors,
+                narrative=macro_narrative(verdict, weeks, sets=sets, reps=reps),
+                warnings=flags,
+            )
         )
 
     resolved_items: list[ProposedItem] = []
@@ -196,17 +261,21 @@ async def evaluate_prompt(
     for item in extracted.items:
         history, catalog_id = await bind_name(session, item.exercise_name, names)
         if history is None:
-            return _halt(
-                HaltReason.missing_exercise,
-                _MISSING_EXERCISE.format(name=item.exercise_name),
-                exercise_name=item.exercise_name,
+            return finish(
+                _halt(
+                    HaltReason.missing_exercise,
+                    _MISSING_EXERCISE.format(name=item.exercise_name),
+                    exercise_name=item.exercise_name,
+                )
             )
         last = last_working({history, item.exercise_name}, sessions, benchmarks)
         if last is None:
-            return _halt(
-                HaltReason.missing_exercise,
-                _MISSING_EXERCISE.format(name=history),
-                exercise_name=history,
+            return finish(
+                _halt(
+                    HaltReason.missing_exercise,
+                    _MISSING_EXERCISE.format(name=history),
+                    exercise_name=history,
+                )
             )
         key = catalog_id or history
         bound = item.model_copy(
@@ -224,10 +293,12 @@ async def evaluate_prompt(
     cited: list[ItemVerdict] = []
     for verdict, item in zip(verdicts, resolved_items, strict=True):
         cited.append(await with_citation(session, verdict, citations, item.exercise_id))
-    return EvaluationResult(
-        overall_light=overall,
-        items=cited,
-        session_factors=factors,
-        narrative=session_narrative(overall, cited, factors),
-        warnings=flags,
+    return finish(
+        EvaluationResult(
+            overall_light=overall,
+            items=cited,
+            session_factors=factors,
+            narrative=session_narrative(overall, cited, factors),
+            warnings=flags,
+        )
     )

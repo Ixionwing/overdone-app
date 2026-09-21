@@ -41,9 +41,15 @@ def create_mcp(
             return status.model_dump(mode="json")
 
     @mcp.tool
-    async def evaluate_prompt(prompt: str) -> dict:
+    async def evaluate_prompt(prompt: str, log: str | None = None) -> dict:
+        """Score a proposed increment. Optional log is an inline baseline."""
         async with session_factory() as session:
-            result = await run_evaluate(session, prompt, llm_client=get_llm_client())
+            result = await run_evaluate(
+                session,
+                prompt,
+                llm_client=get_llm_client(),
+                log_text=log,
+            )
             return result.model_dump(mode="json")
 
     return mcp

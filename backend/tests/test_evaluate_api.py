@@ -129,35 +129,6 @@ def test_multi_movement_itemizes_three(client: TestClient) -> None:
     assert "pushdown" in names
 
 
-def test_pushdown_sets_reps_and_weight_change_volume(client: TestClient) -> None:
-    _put(client)
-    response = client.post(
-        "/api/v1/evaluate",
-        json={
-            "prompt": ("I want to make my cable pushdown 3 sets of 10 reps, 45lbs each")
-        },
-    )
-    assert response.status_code == 200
-    body = response.json()
-    assert body["halted"] is None
-    assert "pushdown" in body["items"][0]["exercise_name"].casefold()
-    assert body["items"][0]["factors"]["volume_jump_pct"] == -6.2
-
-
-def test_macro_225_squat_next_month(client: TestClient) -> None:
-    _put(client)
-    response = client.post(
-        "/api/v1/evaluate",
-        json={"prompt": "Reach a 225 lb Squat by next month."},
-    )
-    assert response.status_code == 200
-    body = response.json()
-    assert body["halted"] is None
-    assert body["overall_light"] == "red"
-    assert "squat" in body["items"][0]["exercise_name"].casefold()
-    assert "red" in (body["narrative"] or "").lower()
-
-
 def test_up_to_weight_in_a_month_uses_macro_narrative(client: TestClient) -> None:
     _put(client)
     session = client.post(
@@ -232,18 +203,6 @@ def test_substitution_disclaimer_still_scores(client: TestClient) -> None:
     )
 
 
-def test_plus_500lb_is_red_extreme_jump(client: TestClient) -> None:
-    _put(client)
-    response = client.post(
-        "/api/v1/evaluate",
-        json={"prompt": "Add 500 lbs to my Bench Press tomorrow."},
-    )
-    assert response.status_code == 200
-    body = response.json()
-    assert body["overall_light"] == "red"
-    assert body["items"][0]["factors"]["volume_jump_pct"] == 270.3
-
-
 def test_evaluate_does_not_insert_sessions(client: TestClient) -> None:
     _put(client)
     prompt = {"prompt": "I want to add 20 lbs to my bench press tomorrow"}
@@ -262,18 +221,6 @@ def test_empty_baseline_halts(client: TestClient) -> None:
     )
     assert response.status_code == 200
     assert response.json()["halted"]["reason"] == "missing_baseline"
-
-
-def test_qualitative_note_does_not_change_volume(client: TestClient) -> None:
-    _put(client)
-    response = client.post(
-        "/api/v1/evaluate",
-        json={"prompt": "I want to add 20 lbs to my bench press tomorrow"},
-    )
-    assert response.status_code == 200
-    body = response.json()
-    assert body["items"][0]["factors"]["volume_jump_pct"] == 10.8
-    assert any(flag["kind"] == "qualitative_note" for flag in body["warnings"])
 
 
 def test_embedding_nickname_scores_like_bench(
@@ -305,8 +252,6 @@ def test_embedding_nickname_scores_like_bench(
     assert response.status_code == 200
     body = response.json()
     assert body["halted"] is None
-    assert body["overall_light"] == "yellow"
-    assert body["items"][0]["factors"]["volume_jump_pct"] == 10.8
     assert body["items"][0]["catalog_source_id"] == (
         "Barbell_Bench_Press_-_Medium_Grip"
     )

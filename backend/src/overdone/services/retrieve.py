@@ -42,6 +42,10 @@ def relative_day(logged_on: date, today: date | None = None) -> str:
     return f"{days} days ago"
 
 
+def is_qualitative_note(text: str) -> bool:
+    return bool(_QUALITATIVE.search(text))
+
+
 def note_banner(logged_on: date, quote: str, today: date | None = None) -> str:
     return f"Note from {relative_day(logged_on, today)}: '{quote}'"
 
@@ -181,7 +185,7 @@ async def retrieve_context(
     notes: list[RetrievedChunk] = []
     seen: set[str] = set()
     for note in [*keyword_notes, *semantic_notes]:
-        if not note.text.strip() or not _QUALITATIVE.search(note.text):
+        if not note.text.strip() or not is_qualitative_note(note.text):
             continue
         key = note.source_id or note.text
         if key in seen:
